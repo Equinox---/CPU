@@ -1,3 +1,4 @@
+//
 module ALU(A, B, ALUFun, Sign, S);
 	input [31:0]A, B;
 	input [5:0]ALUFun;
