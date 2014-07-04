@@ -5,6 +5,11 @@ work/*
 *.mpf
 *.mti
 
+# python
+*.py[cod]
+*.testfile
+*.out
+
 # emacs
 *~
 [#]*[#]
