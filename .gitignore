@@ -5,3 +5,8 @@ work/*
 *.mpf
 *.mti
 
+# emacs
+*~
+[#]*[#]
+
+# add other file/directories here to ignore by git
