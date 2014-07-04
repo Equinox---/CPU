@@ -181,7 +181,7 @@ def parseText(code):
 		for item in labelWaitDict[waitLabel]:
 			_IorJ, _inum, _addr = item
 			if _IorJ == 1:
-				labelRepStr = IntToBinStr(int(LabelDict[waitLabel][2:], 16) - int(_addr[2:],16) - 4, 16) # I-Type: relative
+				labelRepStr = IntToBinStr(int(LabelDict[waitLabel][2:], 16) - int(_addr[2:],16) - 4, 18)[:-2] # I-Type: relative
 			else:
 				labelRepStr = IntToBinStr(int(LabelDict[waitLabel][2:], 16), 32)[4:30] # J-Type: absolute
 			binary[_inum] = re.sub(r"_label", labelRepStr, binary[_inum])
