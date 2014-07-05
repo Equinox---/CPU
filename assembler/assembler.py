@@ -9,7 +9,7 @@ import re
 import sys
 
 # Parameters
-Start_Addr = '0x82807880'
+Start_Addr = '0x00400000'
 
 
 # Data
@@ -88,6 +88,10 @@ def Error(string):
 	print "Error: " + string
 	sys.exit(1)
 
+def rmlae(x):
+	if x[-1] == "L":
+		x = x[:-1]
+	return x
 def IntToBinStr(integer, num):
 	if isinstance(integer, str):
 		if not integer.isdigit():
@@ -172,7 +176,8 @@ def parseText(code):
 				binary.append("%s\t%s"%(nowAddr, Pattern_Sets[i][innerType].format(**info)))
 				found = 1
 				number += 1
-				nowAddr = hex(int(nowAddr[2:], 16) + 4)[:-1]
+				nowAddr = rmlae(hex(int(nowAddr[2:], 16) + 4))
+				nowAddr = "0x" + (10 - len(nowAddr)) * "0" + nowAddr[2:]
 		if not found:
 			Error("Instruction unrecognized: '%s' !"%instruct)
 
@@ -228,10 +233,7 @@ if __name__ == "__main__":
 		destfile = srcfile + '.out'
 	destfile = open(destfile, "w")
 	binary = parseFile(srcfile)
-	def rmlae(x):
-		if x[-1] == "L":
-			x = x[:-1]
-		return x
+
 	if verilog:
 		import math
 		destfile.write("case(addr[%d:2])\n"%(int(math.ceil(math.log(len(binary), 2))) + 1))
