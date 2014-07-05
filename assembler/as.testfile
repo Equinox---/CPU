@@ -1,0 +1,23 @@
+	add $1 $2 $3
+	sub $3 $20 $1
+label1:
+	beq $2 $6 label2
+	lw $1 -10($2)
+label2:
+	and $2 $1 $2 // lalala
+	j label1
+	jr $3
+strcpy:
+addi $sp  $sp  -4
+sw $s0  0($sp)
+add $s0  $zero  $zero
+L1:
+add $t1  $s0  $a1
+add $t1  $s0  $a0
+beq $t2  $zero  L2
+addi $s0  $s0  1
+j L1
+L2:
+lw $s0  0($sp)
+addi $sp  $sp  4
+jr $ra

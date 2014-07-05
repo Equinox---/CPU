@@ -228,7 +228,9 @@ if __name__ == "__main__":
 		import math
 		destfile.write("case(addr[%d:2])\n"%(int(math.ceil(math.log(len(binary), 2))) + 1))
 		for i in range(len(binary)):
-			destfile.write("\t%d: data <= 32'b"%i + binary[i][11:] + ";\n")
+			destfile.write("\t%d: data <= 32'b"%i + binary[i][11:17] + "_" + binary[i][17:22] + "_"
+												  + binary[i][22:27] + "_" + binary[i][27:32] + "_"
+											      + binary[i][32:37] + "_" + binary[i][37:43] + ";\n")
 		destfile.write("\tdefault: data <= 32'b" + binary[0][11:] + ";\nendcase")
 	else:
 		destfile.write("\n".join(binary))
