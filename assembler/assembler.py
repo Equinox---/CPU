@@ -2,6 +2,8 @@
 #-*- coding: utf-8 -*-
 
 # This is an easy assembler of simplified MIPS architecture implemeted in Python.
+# Last Version ：v1.1
+# 加入了输出hex的选择，修改了两处弄错的参数顺序
 
 import re
 import sys
@@ -14,10 +16,10 @@ Start_Addr = '0x82807880'
 R_PATTERN = {
 			0 : "000000{arg2}{arg3}{arg1}00000{op}",
 			1 : "00000000000{arg2}{arg1}{arg3}{op}",
-			2 : "00000000000{arg1}0000000000{op}"
+			2 : "000000{arg1}000000000000000{op}"
 			}
 I_PATTERN = {
-			0 : "{op}{arg2}{arg1}{arg3}",
+			0 : "{op}{arg1}{arg2}{arg3}",
 			2 : "{op}{arg2in}{arg1}{arg2out}",
 			3 : "{op}00000{arg1}{arg2}",
 			1 : "{op}{arg1}00000{arg2}"
@@ -50,7 +52,7 @@ I_Set = {
 			"beq"  : (0, "000100"),
 			"bne"  : (0, "000101"),
 			"slti" : (0, "001010"),
-			"sltiu": (0, "001011"), # type0 : rt = $1, rs = $2, immediate = $3
+			"sltiu": (0, "001011"), # type0 : rt = $2, rs = $1, immediate = $3
 			"blez" : (1, "000110"),
 			"bgtz" : (1, "000111"),
 			"bltz" : (1, "000001"),  # type1 : rs = $1, immediate = $2, rt = 0 
@@ -214,23 +216,39 @@ if __name__ == "__main__":
 					  help="destination file name", default="")
 	parser.add_option('-v', '--verilog', action='store_true', dest='verilog',
 					  help='output verilog code segment file that can be used directly', default = False)
-
+	parser.add_option('--hex', action="store_true", dest="hexformat",
+						help="output in hex format rather than bin format", default = False)
 	options, junk = parser.parse_args(sys.argv[2:])
 	if len(junk) != 0:
 		raise Exception('Command line input not understood: ' + str(junk))
 	destfile = options.destfile
 	verilog = options.verilog
+	hexformat = options.hexformat
 	if not destfile:
 		destfile = srcfile + '.out'
 	destfile = open(destfile, "w")
 	binary = parseFile(srcfile)
+	def rmlae(x):
+		if x[-1] == "L":
+			x = x[:-1]
+		return x
 	if verilog:
 		import math
 		destfile.write("case(addr[%d:2])\n"%(int(math.ceil(math.log(len(binary), 2))) + 1))
 		for i in range(len(binary)):
-			destfile.write("\t%d: data <= 32'b"%i + binary[i][11:17] + "_" + binary[i][17:22] + "_"
-												  + binary[i][22:27] + "_" + binary[i][27:32] + "_"
-											      + binary[i][32:37] + "_" + binary[i][37:43] + ";\n")
+			if hexformat:
+				hexStr = hex(int(binary[i][11:], 2))[2:]
+				hexStr = (8 - len(hexStr)) * "0" + rmlae(hexStr)
+				destfile.write("\t%d: data <= 32'h"%i + hexStr + ";\n")
+			else:
+				destfile.write("\t%d: data <= 32'b"%i + binary[i][11:17] + "_" + binary[i][17:22] + "_"
+													  + binary[i][22:27] + "_" + binary[i][27:32] + "_"
+												      + binary[i][32:37] + "_" + binary[i][37:43] + ";\n")
 		destfile.write("\tdefault: data <= 32'b" + binary[0][11:] + ";\nendcase")
 	else:
-		destfile.write("\n".join(binary))
+		if hexformat:
+			hexF = [rmlae(hex(int(x[11:], 2))[2:]) for x in binary]
+			hexF = [binary[i][:11] + "\t" +"0" * (8 - len(hexF[i])) + hexF[i] for i in range(len(hexF))]
+			destfile.write("\n".join(hexF))
+		else:
+			destfile.write("\n".join(binary))
