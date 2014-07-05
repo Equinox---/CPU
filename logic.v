@@ -7,6 +7,6 @@ module Logic(A, B, ALUFun, S);
 	assign aorb=A|B;
 	assign axorb=A^B;
 	assign anorb=~(A|B);
-	assign S=ALUFun[3]? (ALUFun[2]? aorb:(ALUFun[1]? A:aandb)):(ALUFun[2]? axorb:anorb);
+	assign S=ALUFun[3]? (ALUFun[2]? aorb:(ALUFun[1]? B:aandb)):(ALUFun[2]? axorb:anorb);
 endmodule
 	
