@@ -7,8 +7,7 @@ work/*
 
 # python
 *.py[cod]
-
-# assembler
+*.testfile
 *.out
 
 # emacs
