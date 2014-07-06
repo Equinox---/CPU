@@ -16,6 +16,7 @@ Start_Addr = '0x00400000'
 
 
 # Data
+"""
 R_PATTERN = {
 			0 : "000000{arg2}{arg3}{arg1}00000{op}",
 			1 : "00000000000{arg2}{arg1}{arg3}{op}",
@@ -29,7 +30,20 @@ I_PATTERN = {
 			}
 
 J_PATTERN = {0 : "{op}{arg1}"}
+"""
+R_PATTERN = {
+			0 : "000000_{arg2}_{arg3}_{arg1}_00000_{op}",
+			1 : "00000000000_{arg2}_{arg1}_{arg3}_{op}",
+			2 : "000000_{arg1}_00000_00000_00000_{op}"
+			}
+I_PATTERN = {
+			0 : "{op}_{arg1}_{arg2}_{arg3}",
+			2 : "{op}_{arg2in}_{arg1}_{arg2out}",
+			3 : "{op}_00000_{arg1}_{arg2}",
+			1 : "{op}_{arg1}_00000_{arg2}"
+			}
 
+J_PATTERN = {0 : "{op}_{arg1}"}
 Pattern_Sets = [R_PATTERN, I_PATTERN, J_PATTERN]
 
 R_Set = {
@@ -84,7 +98,7 @@ labelWaitDict = {}
 # --- regular expressions ---
 regexp = re.compile
 RE_WHITESPACE = regexp("[\s,]+")
-RE_LABEL = regexp("[a-zA-Z0-9_]+:")
+RElabel = regexp("[a-zA-Z0-9_]+:")
 RE_COMMENT = regexp("#[^\r\n]*\\n")
 
 def Error(string):
@@ -120,9 +134,10 @@ def parseText(code):
 	global LabelDict, labelWaitDict
 	code = [RE_WHITESPACE.sub(r" ", x) for x in code] # get rid of extra whitespace in every instruction
 	binary = []
+	asmCode = []
 	number = 0
 	nowAddr = Start_Addr
-	print code
+	#print code
 	for instruct in code:
 		if not instruct or instruct == " ":
 			continue
@@ -131,6 +146,7 @@ def parseText(code):
 		if instruct[0] == " ":
 			instruct = instruct[1:]
 		insL = instruct.split(" ")
+		asmCode.append(instruct)
 		# record label and its corresponding absolute address
 		if insL[0][-1] == ":":
 			newLabel = insL.pop(0)[:-1]
@@ -156,11 +172,11 @@ def parseText(code):
 						info["arg1"] = IntToBinStr(arg1, 5)
 						if not innerType:
 							info["arg2"] = IntToBinStr(arg2, 5)
-							info["arg3"] = "_label"
+							info["arg3"] = "label"
 						else:
-							info["arg2"] = "_label"
+							info["arg2"] = "label"
 					else:
-						info["arg1"] = "_label"
+						info["arg1"] = "label"
 				else:
 					info["arg1"] = IntToBinStr(arg1, 5)
 					if i == 1: # I-Type i == 1
@@ -201,9 +217,9 @@ def parseText(code):
 				labelRepStr = IntToBinStr(int(LabelDict[waitLabel][2:], 16) - int(_addr[2:],16) - 4, 18)[:-2] # I-Type: relative
 			else:
 				labelRepStr = IntToBinStr(int(LabelDict[waitLabel][2:], 16), 32)[4:30] # J-Type: absolute
-			binary[_inum] = re.sub(r"_label", labelRepStr, binary[_inum])
+			binary[_inum] = re.sub(r"label", labelRepStr, binary[_inum])
 
-	return binary
+	return binary, asmCode
 
 def parseFile(filename):
 	codeFile = open(filename)
@@ -233,34 +249,51 @@ if __name__ == "__main__":
 					  help='output verilog code segment file that can be used directly', default = False)
 	parser.add_option('--hex', action="store_true", dest="hexformat",
 						help="output in hex format rather than bin format", default = False)
+	parser.add_option('-c', "--comment", action="store_true", dest="comment",
+						help="output asm code comment together with binary code", default = False)
 	options, junk = parser.parse_args(sys.argv[2:])
 	if len(junk) != 0:
 		raise Exception('Command line input not understood: ' + str(junk))
 	destfile = options.destfile
 	verilog = options.verilog
 	hexformat = options.hexformat
+	comment = options.comment
 	if not destfile:
 		destfile = srcfile + '.out'
 	destfile = open(destfile, "w")
-	binary = parseFile(srcfile)
+	binary, asmCode = parseFile(srcfile)
 
 	if verilog:
 		import math
 		destfile.write("case(addr[%d:2])\n"%(int(math.ceil(math.log(len(binary), 2))) + 1))
 		for i in range(len(binary)):
+			if ":" in asmCode[i]:
+				ind = asmCode[i].index(":") + 1
+				destfile.write("\t// %s\n"%(asmCode[i][:ind]))
+				asmCode[i] = asmCode[i][(ind+1):]
 			if hexformat:
+				binary = [x.replace("_", "") for x in binary]
 				hexStr = hex(int(binary[i][11:], 2))[2:]
 				hexStr = (8 - len(hexStr)) * "0" + rmlae(hexStr)
 				destfile.write("\t%d: data <= 32'h"%i + hexStr + ";\n")
 			else:
-				destfile.write("\t%d: data <= 32'b"%i + binary[i][11:17] + "_" + binary[i][17:22] + "_"
-													  + binary[i][22:27] + "_" + binary[i][27:32] + "_"
-												      + binary[i][32:37] + "_" + binary[i][37:43] + ";\n")
+				#destfile.write("\t%d: data <= 32'b"%i + binary[i][11:17] + "_" + binary[i][17:22] + "_"
+													  #+ binary[i][22:27] + "_" + binary[i][27:32] + "_"
+												      #+ binary[i][32:37] + "_" + binary[i][37:43] 
+												      #+ "; // %s\n"%asmCode[i])
+				destfile.write("\t%d: data <= 32'b"%i + binary[i][11:] + "; // %s\n"%asmCode[i])
 		destfile.write("\tdefault: data <= 32'b" + binary[0][11:] + ";\nendcase")
 	else:
+		binary = [x.replace("_", "") for x in binary]
 		if hexformat:
 			hexF = [rmlae(hex(int(x[11:], 2))[2:]) for x in binary]
 			hexF = [binary[i][:11] + "\t" +"0" * (8 - len(hexF[i])) + hexF[i] for i in range(len(hexF))]
-			destfile.write("\n".join(hexF))
+			if comment:
+				destfile.write("\n".join([hexF[i] + " // " + asmCode[i] for i in range(len(hexF))]))
+			else:
+				destfile.write("\n".join(hexF))
 		else:
-			destfile.write("\n".join(binary))
+			if comment:
+				destfile.write("\n".join([binary[i] + " // " + asmCode[i] for i in range(len(binary))]))
+			else:
+				destfile.write("\n".join(binary))
