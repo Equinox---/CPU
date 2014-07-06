@@ -2,8 +2,11 @@
 #-*- coding: utf-8 -*-
 
 # This is an easy assembler of simplified MIPS architecture implemeted in Python.
-# Last Version ：v1.1
+# v1.1
 # 加入了输出hex的选择，修改了两处弄错的参数顺序
+# v1.2
+# 加入了对十六进制常数的支持
+
 
 import re
 import sys
@@ -80,9 +83,9 @@ labelWaitDict = {}
 
 # --- regular expressions ---
 regexp = re.compile
-RE_WHITESPACE = regexp("\s+")
+RE_WHITESPACE = regexp("[\s,]+")
 RE_LABEL = regexp("[a-zA-Z0-9_]+:")
-RE_COMMENT = regexp("//[^\r\n]*\\n")
+RE_COMMENT = regexp("#[^\r\n]*\\n")
 
 def Error(string):
 	print "Error: " + string
@@ -95,12 +98,15 @@ def rmlae(x):
 def IntToBinStr(integer, num):
 	if isinstance(integer, str):
 		if not integer.isdigit():
-			if not (integer[0] == "$" or integer[0] == "-"):
+
+			if not (integer[0] == "$" or integer[0] == "-" or integer[:2] == "0x"):
 				Error("Instruction format error: expected register argument: %s !"%integer)
 			if integer[0] == "$":
 				integer = integer[1:]
 				if not integer.isdigit():
 					integer = Register_Map[integer]
+			elif integer[:2] == "0x":
+				integer = int(integer, 16)
 	integer = int(integer)
 
 	if integer < 0:
@@ -116,7 +122,10 @@ def parseText(code):
 	binary = []
 	number = 0
 	nowAddr = Start_Addr
+	print code
 	for instruct in code:
+		if not instruct or instruct == " ":
+			continue
 		if instruct[-1] == " ":
 			instruct = instruct[:-1] # get rid of empty string at end
 		if instruct[0] == " ":
@@ -131,6 +140,7 @@ def parseText(code):
 		# parse the instruction
 		info = {}
 		found = 0
+
 		for i in range(len(INSTRUCT_SETS)):
 			if insL[0] in INSTRUCT_SETS[i]:
 				innerType = INSTRUCT_SETS[i][insL[0]][0]
@@ -200,7 +210,7 @@ def parseFile(filename):
 	rawText = codeFile.read()
 	predText = RE_COMMENT.sub(r"\n", rawText) # remove comment
 	predText = re.sub("\n{2,}", "\n", predText) # remove continuous \n
-	predText = re.sub(":\n", ": ", predText) # make label in the same line with the next instruction
+	predText = re.sub(":[ \t]*\n", ": ", predText) # make label in the same line with the next instruction
 	
 	return parseText(predText.split("\n"))
 

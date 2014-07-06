@@ -8,12 +8,12 @@
 module ControlUnit(input [31:0] instruct,
 					input IRQsig,
 					input super, // super == PC[31]
-					output[2:0] PCsrc,
-					output[1:0] RegDst, MemtoReg,
-					output[5:0] ALUFun,
-					output Sign, ALUsrc1, ALUsrc2,
-					output RegWr, MemWr, MemRd,
-					output EXTOp, LUOp);
+					output reg[2:0] PCsrc,
+					output reg[1:0] RegDst, MemtoReg,
+					output reg[5:0] ALUFun,
+					output reg Sign, ALUsrc1, ALUsrc2,
+					output reg RegWr, MemWr, MemRd,
+					output reg EXTOp, LUOp);
 
 	/*assign isRType = (op == 0);
 	assign isIType = (op >= 4 && op < 13) || op == 1 || op == 15 || op == 35 || op == 43;
@@ -24,10 +24,11 @@ module ControlUnit(input [31:0] instruct,
 	assign PCsrc[1] = (isRType && (func == 8 || func == 9))\
 						|| isJType;
 	*/
+
 	always @(*)
 		begin
-		if (IRQ && !super)
-			{PCsrc, RegDst, ReWr, MemtoReg} <= {3'h5, 2'h3, 1'h1, 2'h2};
+		if (IRQsig && !super)
+			{PCsrc, RegDst, RegWr, MemtoReg} <= {3'h5, 2'h3, 1'h1, 2'h2};
 		else
 			case ({instruct[31:26],instruct[5:0]})
 				12'b000000100000: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h0, 1'h1, 1'h0, 1'h0, 6'b000000, 1'h1, 1'h0, 1'h0, 2'h0, 1'h0, 1'h0};
@@ -59,7 +60,7 @@ module ControlUnit(input [31:0] instruct,
 				12'b001111??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h1, 1'h1, 1'h0, 1'h1, 6'b011010, 1'h0, 1'h0, 1'h0, 2'h0, 1'h0, 1'h1};
 				12'b000010??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h2, 2'h0, 1'h0, 1'h0, 1'h0, 6'b000000, 1'h0, 1'h0, 1'h0, 2'h0, 1'h0, 1'h0};
 				12'b000011??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h2, 2'h2, 1'h1, 1'h0, 1'h0, 6'b000000, 1'h0, 1'h0, 1'h0, 2'h2, 1'h0, 1'h0};
-				default: {PCsrc, RegDst, ReWr, MemtoReg} <= {3'h5, 2'h3, 1'h1, 2'h2}; //How about exception in Kernel mode
+				default: {PCsrc, RegDst, RegWr, MemtoReg} <= {3'h5, 2'h3, 1'h1, 2'h2}; //How about exception in Kernel mode
 			endcase
 		end
  

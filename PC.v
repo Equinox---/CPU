@@ -14,8 +14,11 @@ module PCUnit(
 			output reg [31:0] PC,
 			output super);
 
+	wire [31:0] tmpPCplus4;
+
 	assign super = PC[31];
-	assign PCplus4 = {PC[31], (PC + 4)[30:0]};
+	assign tmpPCplus4 = PC + 4;
+	assign PCplus4 = {PC[31], tmpPCplus4[30:0]};
 
 	always @(posedge CLK or negedge Reset_n)
 		begin
@@ -28,7 +31,7 @@ module PCUnit(
 			case (PCsrc)
 				0: PC <= PCplus4;
 				1: PC <= ALUOut0?ConBA:PCplus4;
-				2: PC <= {PCplus4[31:28], JTaddr, 0'b00};
+				2: PC <= {PCplus4[31:28], JTaddr, 2'b0};
 				3: PC <= DatabusA;
 				4: PC <= 32'h80000004;
 				5: PC <= 32'h80000008;

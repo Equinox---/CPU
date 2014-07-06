@@ -5,10 +5,13 @@
 
 module SCMIPS(
 			input sysclk,
-			input Reset_n);
+			input Reset_n,
+			input [7:0] switch,
+			output [7:0] led,
+			output [7:0] digi_out1, digi_out2, digi_out3, digi_out4
+			);
 
 	// Instruct and PC-realted
-	wire PCclk;
 	wire [31:0] instruct;
 	wire [31:0] PC, PCplus4, ConBA;
 
@@ -21,13 +24,14 @@ module SCMIPS(
 	wire [15:0] Imm16;
 	wire [25:0] JTaddr;
 
-	// IRQ
+	// Periperal-related
 	wire IRQsig;
+	wire [11:0] digit;
 
 	// Control Signals
 	wire Sign, ALUsrc1, ALUsrc2, super, RegWr, MemWr, MemRd, EXTOp, LUOp;
-	wire [2:0] PCsrc,
-	wire [1:0] RegDst, MemtoReg,
+	wire [2:0] PCsrc;
+	wire [1:0] RegDst, MemtoReg;
 	wire [5:0] ALUFun;
 
 	// Register-related
@@ -48,7 +52,7 @@ module SCMIPS(
 								.RegDst(RegDst), .RegWr(RegWr), .ALUFun(ALUFun), .MemRd(MemRd),
 								.MemWr(MemWr), .MemtoReg(MemtoReg), .Sign(Sign), .ALUsrc1(ALUsrc1),
 								.ALUsrc2(ALUsrc2), .EXTOp(EXTOp), .LUOp(LUOp)); // control unit
-	PCUnit PCInst(.Reset_n(Reset_n), .CLK(PCclk), .PCsrc(PCsrc),
+	PCUnit PCInst(.Reset_n(Reset_n), .CLK(sysclk), .PCsrc(PCsrc),
 				  .ALUOut0(ALUOut[0]), .ConBA(ConBA), .JTaddr(JTaddr), .DatabusA(DatabusA),
 				  .PCplus4(PCplus4), .PC(PC), .super(super)); //PC
 	ROM InstructMemInst(PC, instruct); //instruct fetch
@@ -57,6 +61,10 @@ module SCMIPS(
 	ALU ALUInst(.A(ALUInA), .B(ALUInB), .S(ALUOut), .ALUFun(ALUFun), .Sign(Sign)); // ALU Unit
 	DataMem DataMemInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr),
 						.addr(ALUOut), .wdata(DatabusB), .rdata(rDataFMem)); // Data memory
+	Peripheral PeripheralInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
+							  .wdata(DatabusB), .rdata(rDataFMem), .led(led), .switch(switch), .digi(digit), .irqout(IRQsig));
+	digitube_scan DigitubeInst(.digi_in(digit), .digi_out1(digi_out1), .digi_out2(digi_out2), .digi_out3(digi_out3),
+							   .digi_out4(digi_out4));
 	ExtendUnit ExtendUnitInst(.EXTOp(EXTOp), .Imm16(Imm16), .ExtendedImm(ExtendedImm)); // Extend unit
 
 
