@@ -20,7 +20,7 @@ module UARTUnit(
 	wire baud_rate_clk;
 	wire RX_STATUS, TX_STATUS;
 
-	assign UART_CON[4] = ~TX_STATUS; // UART_CON[4] = 0发送模块空闲
+
 	always@(*)
 		begin
 		if(rd)
@@ -50,12 +50,13 @@ module UARTUnit(
 			begin
 			UART_TXD <= 8'b0;
 			UART_RXD <= 8'b0;
-			UART_CON <= 4'b0;
+			UART_CON <= 5'b0;
 			prevTX_STATUS <= 1;
 			TX_EN <= 0;
 			end
 		else
 			begin
+			UART_CON[4] <= TX_STATUS;
 			prevTX_STATUS <= TX_STATUS;
 			TX_EN <= 0;
 			if (RX_STATUS && UART_CON[1])

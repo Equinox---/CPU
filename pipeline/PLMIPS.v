@@ -64,13 +64,13 @@ module PLMIPS(
 								.RegDst(ID_RegDst), .RegWr(ID_RegWr), .ALUFun(ID_ALUFun), .MemRd(ID_MemRd),
 								.MemWr(ID_MemWr), .MemtoReg(ID_MemtoReg), .Sign(ID_Sign), .ALUsrc1(ID_ALUsrc1),
 								.ALUsrc2(ID_ALUsrc2), .EXTOp(EXTOp), .LUOp(LUOp)); // control unit
-	//PCUnit PCInst(.Reset_n(Reset_n), .CLK(sysclk), .PCsrc(PCsrc), .PCProtect(stall),
+	//PCUnit PCInst(.Reset_n(Reset_n), .(sysclk)(sysclk), .PCsrc(PCsrc), .PCProtect(stall),
 	//			  .ALUOut0(ALUOut[0]), .ConBA(ConBA), .JTaddr(JTaddr), .DatabusA(DatabusA),
 	//			  .PCplus4(PCplus4), .PC(PC), .super(super)); //PC
 	ROM InstructMemInst(PC, IF_instruct); //instruct fetch
 	RegFile RegFileInst(.reset(Reset_n), .clk(sysclk), .addr1(rs), .addr2(rt), .data1(DatabusA),
 						.data2(DatabusB), .wr(MEM_RegWr), .addr3(MEM_rdes), .data3(DataBusC)); // register unit
-	ALU ALUInst(.A(ALUInA), .B(ALUInB), .S(ALUOut), .ALUFun(ALUFun), .Sign(Sign)); // ALU Unit
+	ALU ALUInst(.A(ALUInA), .B(ALUInB), .S(EX_ALUOut), .ALUFun(EX_ALUFun), .Sign(EX_Sign)); // ALU Unit
 	DataMem DataMemInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr),
 						.addr(ALUOut), .wdata(DatabusB), .rdata(rDataFMem1)); // Data memory
 	Peripheral PeripheralInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
@@ -94,12 +94,12 @@ module PLMIPS(
 						.EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd), .EX_MemtoReg(EX_MemtoReg), .EX_RegWr(EX_RegWr),
 						.EX_DatabusA(EX_DatabusA), .EX_DatabusB(EX_DatabusA), .EX_ExtendedImm(EX_DatabusA),
 						.EX_rt(EX_rt), .EX_rd(EX_rt));
-	EXMEMReg EXMEMRegInst(.CLK(CLK), .Reset_n(Reset_n), .EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd),
+	EXMEMReg EXMEMRegInst(.CLK(sysclk), .Reset_n(Reset_n), .EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd),
 						  .EX_RegWr(EX_RegWr), .EX_MemtoReg(EX_MemtoReg), .EX_ALUOut(EX_ALUOut),
 			 			  .EX_rdes(EX_rdes), .MEM_MemWr(MEM_MemWr), .MEM_MemRd(MEM_MemRd), .MEM_RegWr(MEM_RegWr), 
 			 			  .MEM_MemtoReg(MEM_MemtoReg), .MEM_ALUOut(MEM_MemtoReg), .MEM_rdes(MEM_rdes));
 
-	MEMWBReg MEMWBRegInst(.CLK(CLK), .Reset_n(Reset_n), .MEM_MemtoReg(MEM_MemtoReg), .MEM_RegWr(MEM_RegWr), .MEM_rdes(MEM_rdes),
+	MEMWBReg MEMWBRegInst(.CLK(sysclk), .Reset_n(Reset_n), .MEM_MemtoReg(MEM_MemtoReg), .MEM_RegWr(MEM_RegWr), .MEM_rdes(MEM_rdes),
 					.MEM_ALUOut(MEM_ALUOut), .WB_MemtoReg(WB_MemtoReg), .WB_RegWr(WB_RegWr), .WB_rdes(WB_rdes), .WB_ALUOut(WB_ALUOut));
 
 	ForwardUnit ForwardUnitInst(.EXMEM_RegWr(MEM_RegWr), .EXMEM_rdes(MEM_rdes), .IDEX_rs(EX_rs), .IDEX_rt(EX_rt),
