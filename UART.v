@@ -12,7 +12,7 @@ module UARTUnit(
 				);
 
 	reg [7:0] UART_TXD;
-	reg [7:0] UART_RXD;
+	wire [7:0] UART_RXD;
 	reg [4:0] UART_CON;
 
 	reg TX_EN;
@@ -49,7 +49,6 @@ module UARTUnit(
 		if (~Reset_n)
 			begin
 			UART_TXD <= 8'b0;
-			UART_RXD <= 8'b0;
 			UART_CON <= 5'b0;
 			prevTX_STATUS <= 1;
 			TX_EN <= 0;
