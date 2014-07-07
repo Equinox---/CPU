@@ -6,8 +6,8 @@
 module HazardUnit(
 					input IDEX_MemRd,
 					input [4:0] IDEX_rd, IFID_rs, IFID_rt,
-					output ID_Flush,
-					output stall
+					output reg ID_Flush,
+					output reg stall
 					);
 
 	always @(*)

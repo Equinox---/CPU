@@ -1,5 +1,6 @@
 # modelsim
 work/*
+pipeline/work/*
 *.bak
 *.wlf
 *.mpf

@@ -9,7 +9,7 @@ module PLMIPS(
 			input UART_IN,
 			input [7:0] switch,
 			output [7:0] led,
-			output [6:0] digi_out1, digi_out2, digi_out3, digi_out4
+			output [6:0] digi_out1, digi_out2, digi_out3, digi_out4,
 			output UART_OUT
 			);
 	
@@ -17,9 +17,9 @@ module PLMIPS(
 	wire [31:0] PC, IF_PCplus4, ConBA;
 
 	wire [5:0] ID_op;
-	wire [4:0] ID_rs;
-	wire [4:0] ID_rt;
-	wire [4:0] ID_rd;
+	wire [4:0] ID_rs, EX_rs;
+	wire [4:0] ID_rt, EX_rt;
+	wire [4:0] ID_rd, EX_rd;
 	wire [4:0] ID_shamnt;
 	wire [5:0] ID_func;
 	wire [15:0] ID_Imm16;
@@ -30,19 +30,31 @@ module PLMIPS(
 	wire [11:0] digit;
 
 	// Control Signals
-	wire ID_Sign, ID_SALUsrc1, ID_SALUsrc2, super, ID_SRegWr, ID_SMemWr, ID_SMemRd, EXTOp, LUOp;
-	wire [2:0] ID_SPCsrc;
-	wire [1:0] ID_SRegDst, ID_SMemtoReg;
-	wire [5:0] ID_SALUFun;
+	//ID
+	wire ID_Sign, ID_ALUsrc1, ID_ALUsrc2, super, ID_RegWr, ID_MemWr, ID_MemRd, EXTOp, LUOp;
+	wire [2:0] ID_PCsrc;
+	wire [1:0] ID_RegDst, ID_MemtoReg;
+	wire [5:0] ID_ALUFun;
+	//EX
+	wire EX_Sign, EX_ALUsrc1, EX_ALUsrc2, EX_RegWr, EX_MemWr, EX_MemRd;
+	wire [2:0] EX_PCsrc;
+	wire [1:0] EX_RegDst, EX_MemtoReg;
+	wire [5:0] EX_ALUFun;
+	//MEM
+	wire MEM_RegWr, MEM_MemWr, MEM_MemRd;
+	wire [1:0] MEM_MemtoReg;
+	//WB
+	wire WB_RegWr;
+	wire [1:0] WB_MemtoReg;
 
 	// Register-related
 	wire [4:0] AddrC;
 	wire [31:0] DatabusA, DatabusB, DataBusC;
 
 	// ALU-related
-	wire [31:0] ALUOut;
+	wire [31:0] EX_ALUOut, MEM_ALUOut, WB_ALUOut;
 	wire [31:0] ALUInA, ALUInB;
-	wire [31:0] tmpImm, ExtendedImm;
+	wire [31:0] tmpImm, ID_ExtendedImm, EX_ExtendedImm;
 
 	// DataMem-related
 	wire [31:0] rDataFMem1, rDataFMem2, rDataFMem3, rDataFMem;
@@ -56,7 +68,7 @@ module PLMIPS(
 	wire [31:0] tmpALUInA, tmpALUInB;
 
 	// Pipeline Reg related
-	wire [31:0] ID_PCplus4, ConBA;
+	wire [31:0] ID_PCplus4;
 	wire [4:0] EX_rdes, MEM_rdes;
 
 	// Instances of submodule
@@ -64,18 +76,18 @@ module PLMIPS(
 								.RegDst(ID_RegDst), .RegWr(ID_RegWr), .ALUFun(ID_ALUFun), .MemRd(ID_MemRd),
 								.MemWr(ID_MemWr), .MemtoReg(ID_MemtoReg), .Sign(ID_Sign), .ALUsrc1(ID_ALUsrc1),
 								.ALUsrc2(ID_ALUsrc2), .EXTOp(EXTOp), .LUOp(LUOp)); // control unit
-	//PCUnit PCInst(.Reset_n(Reset_n), .(sysclk)(sysclk), .PCsrc(PCsrc), .PCProtect(stall),
-	//			  .ALUOut0(ALUOut[0]), .ConBA(ConBA), .JTaddr(JTaddr), .DatabusA(DatabusA),
-	//			  .PCplus4(PCplus4), .PC(PC), .super(super)); //PC
+	PCUnit PCInst(.Reset_n(Reset_n), .sysclk(sysclk), .PCsrc(PCsrc), .PCProtect(stall),
+				  .ALUOut0(EX_ALUOut[0]), .ConBA(ConBA), .JTaddr(JTaddr), .DatabusA(DatabusA),
+				  .PCplus4(IF_PCplus4), .PC(PC), .super(super)); //PC
 	ROM InstructMemInst(PC, IF_instruct); //instruct fetch
 	RegFile RegFileInst(.reset(Reset_n), .clk(sysclk), .addr1(rs), .addr2(rt), .data1(DatabusA),
 						.data2(DatabusB), .wr(MEM_RegWr), .addr3(MEM_rdes), .data3(DataBusC)); // register unit
 	ALU ALUInst(.A(ALUInA), .B(ALUInB), .S(EX_ALUOut), .ALUFun(EX_ALUFun), .Sign(EX_Sign)); // ALU Unit
-	DataMem DataMemInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr),
-						.addr(ALUOut), .wdata(DatabusB), .rdata(rDataFMem1)); // Data memory
-	Peripheral PeripheralInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
+	DataMem DataMemInst(.reset(Reset_n), .clk(sysclk), .rd(MEM_MemRd), .wr(MEM_MemWr),
+						.addr(MEM_ALUOut), .wdata(DatabusB), .rdata(rDataFMem1)); // Data memory
+	Peripheral PeripheralInst(.reset(Reset_n), .clk(sysclk), .rd(MEM_MemRd), .wr(MEM_MemWr), .addr(MEM_ALUOut),
 							  .wdata(DatabusB), .rdata(rDataFMem2), .led(led), .switch(switch), .digi(digit), .irqout(IRQsig));
-	UART UartInst(.Reset_n, .CLK(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
+	UART UartInst(.Reset_n, .CLK(sysclk), .rd(MEM_MemRd), .wr(MEM_MemWr), .addr(MEM_ALUOut),
 				  .wdata(DatabusB), .rdata(rDataFMem3), .out(UART_OUT), .in(UART_IN));
 	digitube_scan DigitubeInst(.digi_in(digit), .digi_out1(digi_out1), .digi_out2(digi_out2), .digi_out3(digi_out3),
 							   .digi_out4(digi_out4));
@@ -104,7 +116,7 @@ module PLMIPS(
 
 	ForwardUnit ForwardUnitInst(.EXMEM_RegWr(MEM_RegWr), .EXMEM_rdes(MEM_rdes), .IDEX_rs(EX_rs), .IDEX_rt(EX_rt),
 				.MEMWB_rdes(WB_rdes), .MEMWB_RegWr(WB_RegWr), .ForwardA(ForwardA), .ForwardB(ForwardB));
-	HazardUnit HazardUnitInst(.IDEX_MemRd(EX_MemRd), .IDEX_rd(EX_rd), .IFID_rs(ID_rs), IFID_rt(ID_rt),
+	HazardUnit HazardUnitInst(.IDEX_MemRd(EX_MemRd), .IDEX_rd(EX_rd), .IFID_rs(ID_rs), .IFID_rt(ID_rt),
 							  .ID_Flush(ID_Flush), .stall(stall));
 
 
@@ -114,9 +126,9 @@ module PLMIPS(
 	Mux2_32 alusrc1inst(.Out(tmpALUInA), .mux(ALUsrc1), .I0(DatabusA), .I1({27'b0, shamnt}));
 	Mux2_32 alusrc2inst(.Out(tmpALUInB), .mux(ALUsrc2), .I0(DatabusB), .I1(EX_ExtendedImm));
 	Mux2_32 luopinst(.Out(ID_ExtendedImm), .mux(LUOp), .I0(tmpImm), .I1({Imm16, 16'b0}));
-	Mux4_32 memtreginst(.Out(DataBusC), .mux(WB_MemtoReg), .I0(ALUOut), .I1(rDataFMem),
+	Mux4_32 memtreginst(.Out(DataBusC), .mux(WB_MemtoReg), .I0(WB_ALUOut), .I1(rDataFMem),
 						.I2(PCplus4), .I3(0));
-	Mux4_5 regdstinst(.Out(EX_rdes), .mux(RegDst), .I0(rd), .I1(rt), .I2(5'd31), .I3(5'd26)); 
+	Mux4_5 regdstinst(.Out(EX_rdes), .mux(EX_RegDst), .I0(rd), .I1(rt), .I2(5'd31), .I3(5'd26)); 
 	Mux4_32 forwardainst(.Out(ALUInA), .mux(ForwardA), .I0(tmpALUInA), .I1(DataBusC), .I2(MEM_ALUOut), .I3(0));
 	Mux4_32 forwardbinst(.Out(ALUInB), .mux(ForwardB), .I0(tmpALUInB), .I1(DataBusC), .I2(MEM_ALUOut), .I3(0));
 
@@ -132,5 +144,5 @@ module PLMIPS(
 	assign ID_JTaddr = ID_instruct[25:0];
 
 	// ConBA
-	assign ConBA = PCplus4 + (ExtendedImm << 2);
+	assign ConBA = PCplus4 + (ID_ExtendedImm << 2);
 endmodule
