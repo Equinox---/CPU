@@ -4,6 +4,7 @@ work/*
 *.wlf
 *.mpf
 *.mti
+*.test
 
 # python
 *.py[cod]

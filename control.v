@@ -28,9 +28,9 @@ module ControlUnit(input [31:0] instruct,
 	always @(*)
 		begin
 		if (IRQsig && !super)
-			{PCsrc, RegDst, RegWr, MemtoReg} <= {3'h5, 2'h3, 1'h1, 2'h2};
+			{PCsrc, RegDst, RegWr, MemtoReg} <= {3'h4, 2'h3, 1'h1, 2'h2};
 		else
-			case ({instruct[31:26],instruct[5:0]})
+			casez ({instruct[31:26],instruct[5:0]})
 				12'b000000100000: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h0, 1'h1, 1'h0, 1'h0, 6'b000000, 1'h1, 1'h0, 1'h0, 2'h0, 1'h0, 1'h0};
 				12'b000000100001: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h0, 1'h1, 1'h0, 1'h0, 6'b000000, 1'h0, 1'h0, 1'h0, 2'h0, 1'h0, 1'h0};
 				12'b000000100010: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h0, 1'h1, 1'h0, 1'h0, 6'b000001, 1'h1, 1'h0, 1'h0, 2'h0, 1'h0, 1'h0};

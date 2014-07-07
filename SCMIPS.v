@@ -8,7 +8,7 @@ module SCMIPS(
 			input Reset_n,
 			input [7:0] switch,
 			output [7:0] led,
-			output [7:0] digi_out1, digi_out2, digi_out3, digi_out4
+			output [6:0] digi_out1, digi_out2, digi_out3, digi_out4
 			);
 
 	// Instruct and PC-realted
@@ -35,7 +35,7 @@ module SCMIPS(
 	wire [5:0] ALUFun;
 
 	// Register-related
-	wire [5:0] AddrC;
+	wire [4:0] AddrC;
 	wire [31:0] DatabusA, DatabusB, DataBusC;
 
 	// ALU-related
@@ -72,7 +72,7 @@ module SCMIPS(
 	Mux2_32 alusrc1inst(.Out(ALUInA), .mux(ALUsrc1), .I0(DatabusA), .I1({27'b0, shamnt}));
 	Mux2_32 alusrc2inst(.Out(ALUInB), .mux(ALUsrc2), .I0(DatabusB), .I1(tmpImm));
 	Mux2_32 luopinst(.Out(tmpImm), .mux(LUOp), .I0(ExtendedImm), .I1({Imm16, 16'b0}));
-	Mux4_32 memtreginst(.Out(DataBusC), .mux(memToReg), .I0(ALUOut), .I1(rDataFMem),
+	Mux4_32 memtreginst(.Out(DataBusC), .mux(MemtoReg), .I0(ALUOut), .I1(rDataFMem),
 						.I2(PCplus4), .I3(0));
 	Mux4_5 regdstinst(.Out(AddrC), .mux(RegDst), .I0(rd), .I1(rt), .I2(5'd31), .I3(5'd26)); 
 

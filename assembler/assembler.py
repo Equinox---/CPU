@@ -12,7 +12,7 @@ import re
 import sys
 
 # Parameters
-Start_Addr = '0x00400000'
+Start_Addr = '0x80000000'
 
 
 # Data
@@ -148,12 +148,15 @@ def parseText(code):
 		insL = instruct.split(" ")
 		asmCode.append(instruct)
 		# record label and its corresponding absolute address
-		if insL[0][-1] == ":":
+		print insL
+		while insL and insL[0][-1] == ":":
 			newLabel = insL.pop(0)[:-1]
 			if newLabel in LabelDict:
 				Error("Repeated label '%s' in two place!"%newLabel)#: addr %s and addr %s!"%(newLabel, LabelDict[newLabel], nowAddr))
 			LabelDict[newLabel] = nowAddr
 		# parse the instruction
+		if not insL:
+			continue
 		info = {}
 		found = 0
 
