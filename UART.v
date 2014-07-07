@@ -13,28 +13,35 @@ module UARTUnit(
 
 	reg [7:0] UART_TXD;
 	wire [7:0] UART_RXD;
-	reg [4:0] UART_CON;
+	reg UART_CON0, UART_CON1, UART_CON2, UART_CON3;
+	wire UART_CON4;
+	wire [4:0] UART_CON;
 
 	reg TX_EN;
 	reg prevTX_STATUS;
 	wire baud_rate_clk;
 	wire RX_STATUS, TX_STATUS;
 
-
+	assign UART_CON4 = TX_STATUS;
+	assign UART_CON = {UART_CON4, UART_CON3, UART_CON2, UART_CON1, UART_CON0};
 	always@(*)
 		begin
+		if (RX_STATUS && UART_CON1)
+			UART_CON3 <= 1;
+		if (TX_STATUS && ~prevTX_STATUS && UART_CON0)
+			UART_CON2 <= 1;
 		if(rd)
 			begin
 			case(addr)
 				32'h40000018: 
 					begin
 					rdata <= {24'b0, UART_TXD};
-					UART_CON[2] <= 0;
+					UART_CON2 <= 0;
 					end
 				32'h4000001C:
 					begin
 					rdata <= {24'b0, UART_RXD};
-					UART_CON[3] <= 0;
+					UART_CON3 <= 0;
 					end			
 				32'h40000020: rdata <= {27'b0,UART_CON};
 				default: rdata <= 32'b0;
@@ -49,21 +56,14 @@ module UARTUnit(
 		if (~Reset_n)
 			begin
 			UART_TXD <= 8'b0;
-			UART_CON[1:0] <= 2'b0;
+			{UART_CON0, UART_CON1} <= 2'b0;
 			prevTX_STATUS <= 1;
 			TX_EN <= 0;
 			end
 		else
 			begin
-			UART_CON[4] <= TX_STATUS;
 			prevTX_STATUS <= TX_STATUS;
 			TX_EN <= 0;
-			if (RX_STATUS && UART_CON[1])
-				begin
-				UART_CON[3] <= 1;
-				end
-			if (TX_STATUS && ~prevTX_STATUS && UART_CON[0])
-				UART_CON[2] <= 1;
 			if (wr)
 				begin
 				case (addr)
@@ -72,7 +72,7 @@ module UARTUnit(
 						UART_TXD <= wdata[7:0];
 						TX_EN <= 1;
 						end
-					32'h40000020: UART_CON[1:0] <= wdata[1:0];
+					32'h40000020: {UART_CON1, UART_CON0} <= wdata[1:0];
 					default: ;
 				endcase
 				end
