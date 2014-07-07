@@ -15,6 +15,7 @@ module PLMIPS(
 	
 	wire [31:0] IF_instruct, ID_instruct;
 	wire [31:0] PC, IF_PCplus4, ConBA;
+	wire PC_Jump, PC_branch;
 
 	wire [5:0] ID_op;
 	wire [4:0] ID_rs, EX_rs;
@@ -119,6 +120,11 @@ module PLMIPS(
 	HazardUnit HazardUnitInst(.IDEX_MemRd(EX_MemRd), .IDEX_rd(EX_rd), .IFID_rs(ID_rs), .IFID_rt(ID_rt),
 							  .ID_Flush(ID_Flush), .stall(stall));
 
+
+
+	// Control
+	assign PC_Jump = (ID_PCsrc == );
+	assign PC_branch = ;
 
 
 	// muxes

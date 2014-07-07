@@ -99,7 +99,7 @@ module brgenerator(sysclk,brclk,reset);
 			brclk<=0;
 		end
 		else begin
-			if(count==216) begin
+			if(count==1) begin
 				count<=0;
 				brclk<=~brclk;
 			end

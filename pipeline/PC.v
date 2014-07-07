@@ -7,6 +7,7 @@ module PCUnit(
 			input CLK,
 			input [2:0] PCsrc,
 			input PCProtect, //stall the pipeline
+			input PC_Jump, PC_branch,
 			input ALUOut0,
 			input [31:0] ConBA,
 			input [25:0] JTaddr,
