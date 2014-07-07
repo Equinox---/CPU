@@ -6,9 +6,11 @@
 module SCMIPS(
 			input sysclk,
 			input Reset_n,
+			input UART_IN,
 			input [7:0] switch,
 			output [7:0] led,
 			output [6:0] digi_out1, digi_out2, digi_out3, digi_out4
+			output UART_OUT
 			);
 
 	// Instruct and PC-realted
@@ -44,7 +46,7 @@ module SCMIPS(
 	wire [31:0] tmpImm, ExtendedImm;
 
 	// DataMem-related
-	wire [31:0] rDataFMem;
+	wire [31:0] rDataFMem1, rDataFMem2, rDataFMem3, rDataFMem;
 
 
 	// Instances of submodule
@@ -60,15 +62,18 @@ module SCMIPS(
 						.data2(DatabusB), .wr(RegWr), .addr3(AddrC), .data3(DataBusC)); // register unit
 	ALU ALUInst(.A(ALUInA), .B(ALUInB), .S(ALUOut), .ALUFun(ALUFun), .Sign(Sign)); // ALU Unit
 	DataMem DataMemInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr),
-						.addr(ALUOut), .wdata(DatabusB), .rdata(rDataFMem)); // Data memory
+						.addr(ALUOut), .wdata(DatabusB), .rdata(rDataFMem1)); // Data memory
 	Peripheral PeripheralInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
-							  .wdata(DatabusB), .rdata(rDataFMem), .led(led), .switch(switch), .digi(digit), .irqout(IRQsig));
+							  .wdata(DatabusB), .rdata(rDataFMem2), .led(led), .switch(switch), .digi(digit), .irqout(IRQsig));
+	UART UartInst(.Reset_n, .CLK(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
+				  .wdata(DatabusB), .rdata(rDataFMem3), .out(UART_OUT), .in(UART_IN));
 	digitube_scan DigitubeInst(.digi_in(digit), .digi_out1(digi_out1), .digi_out2(digi_out2), .digi_out3(digi_out3),
 							   .digi_out4(digi_out4));
 	ExtendUnit ExtendUnitInst(.EXTOp(EXTOp), .Imm16(Imm16), .ExtendedImm(ExtendedImm)); // Extend unit
 
 
 	// Variety of Muxer muxed by control signals
+	assign rDataFMem = rDataFMem1 | rDataFMem2 | rDataFMem3;
 	Mux2_32 alusrc1inst(.Out(ALUInA), .mux(ALUsrc1), .I0(DatabusA), .I1({27'b0, shamnt}));
 	Mux2_32 alusrc2inst(.Out(ALUInB), .mux(ALUsrc2), .I0(DatabusB), .I1(tmpImm));
 	Mux2_32 luopinst(.Out(tmpImm), .mux(LUOp), .I0(ExtendedImm), .I1({Imm16, 16'b0}));

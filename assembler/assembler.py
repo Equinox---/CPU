@@ -38,6 +38,7 @@ R_PATTERN = {
 			}
 I_PATTERN = {
 			0 : "{op}_{arg1}_{arg2}_{arg3}",
+			4 : "{op}_{arg2}_{arg1}_{arg3}",
 			2 : "{op}_{arg2in}_{arg1}_{arg2out}",
 			3 : "{op}_00000_{arg1}_{arg2}",
 			1 : "{op}_{arg1}_00000_{arg2}"
@@ -63,13 +64,13 @@ R_Set = {
 			"jalr": (2, "001001") # type2: rs = $1, rd = rt = shamnt = 0
 			}
 I_Set = {
-			"addi" : (0, "001000"),
-			"addiu": (0, "001001"),
-			"andi" : (0, "001100"),
+			"addi" : (4, "001000"),
+			"addiu": (4, "001001"),
+			"andi" : (4, "001100"),
+			"slti" : (4, "001010"),
+			"sltiu": (4, "001011"), # type4: rt=$1, rs = $2,
 			"beq"  : (0, "000100"),
-			"bne"  : (0, "000101"),
-			"slti" : (0, "001010"),
-			"sltiu": (0, "001011"), # type0 : rt = $2, rs = $1, immediate = $3
+			"bne"  : (0, "000101"),# type0 : rt = $2, rs = $1, immediate = $3
 			"blez" : (1, "000110"),
 			"bgtz" : (1, "000111"),
 			"bltz" : (1, "000001"),  # type1 : rs = $1, immediate = $2, rt = 0 
@@ -112,7 +113,6 @@ def rmlae(x):
 def IntToBinStr(integer, num):
 	if isinstance(integer, str):
 		if not integer.isdigit():
-
 			if not (integer[0] == "$" or integer[0] == "-" or integer[:2] == "0x"):
 				Error("Instruction format error: expected register argument: %s !"%integer)
 			if integer[0] == "$":
