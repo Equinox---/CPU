@@ -9,7 +9,7 @@ module SCMIPS(
 			input UART_IN,
 			input [7:0] switch,
 			output [7:0] led,
-			output [6:0] digi_out1, digi_out2, digi_out3, digi_out4
+			output [6:0] digi_out1, digi_out2, digi_out3, digi_out4,
 			output UART_OUT
 			);
 
