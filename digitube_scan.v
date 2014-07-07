@@ -9,10 +9,10 @@ output [6:0] digi_out2;	//1: CG,CF,CE,CD,CC,CB,CA
 output [6:0] digi_out3;	//2: CG,CF,CE,CD,CC,CB,CA
 output [6:0] digi_out4;	//3: CG,CF,CE,CD,CC,CB,CA
 
-assign digi_out1=(digi_in[11:8]==4'b0001)?digi_in[6:0]:7'b111_1111;
-assign digi_out2=(digi_in[11:8]==4'b0010)?digi_in[6:0]:7'b111_1111;
-assign digi_out3=(digi_in[11:8]==4'b0100)?digi_in[6:0]:7'b111_1111;
-assign digi_out4=(digi_in[11:8]==4'b1000)?digi_in[6:0]:7'b111_1111;
+assign digi_out1=(digi_in[10:7]==4'b0001)?digi_in[6:0]:7'b111_1111;
+assign digi_out2=(digi_in[10:7]==4'b0010)?digi_in[6:0]:7'b111_1111;
+assign digi_out3=(digi_in[10:7]==4'b0100)?digi_in[6:0]:7'b111_1111;
+assign digi_out4=(digi_in[10:7]==4'b1000)?digi_in[6:0]:7'b111_1111;
 
 endmodule
 

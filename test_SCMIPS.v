@@ -25,10 +25,10 @@ module test_SCMIPS;
 		//begin
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 1;
 		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 0;
+		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
 		// end1
@@ -39,14 +39,14 @@ module test_SCMIPS;
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
 		// end2
 		#DELAY UART_IN <= 1;
-		#DELAY $stop;
+
 		//#(DELAY * 20)  $stop;
 		//#600 $stop;
 		end

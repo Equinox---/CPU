@@ -112,7 +112,7 @@ def rmlae(x):
 	return x
 def IntToBinStr(integer, num):
 	isNeg = False
-	print integer
+	#print integer
 	if isinstance(integer, str):
 		if not integer.isdigit():
 			if not (integer[0] == "$" or integer[0] == "-" or integer[:2] == "0x"):

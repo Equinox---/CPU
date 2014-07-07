@@ -22,13 +22,20 @@ module UARTUnit(
 	wire baud_rate_clk;
 	wire RX_STATUS, TX_STATUS;
 
+	initial
+		begin
+		UART_CON2 <= 0;
+		UART_CON3 <= 0;
+		UART_CON0 <= 1;
+		UART_CON1 <= 1;
+		end
 	assign UART_CON4 = TX_STATUS;
 	assign UART_CON = {UART_CON4, UART_CON3, UART_CON2, UART_CON1, UART_CON0};
 	always@(*)
 		begin
-		if (RX_STATUS && UART_CON1)
+		if (RX_STATUS)// && UART_CON1)
 			UART_CON3 <= 1;
-		if (TX_STATUS && ~prevTX_STATUS && UART_CON0)
+		if (TX_STATUS && ~prevTX_STATUS) //&& UART_CON0)
 			UART_CON2 <= 1;
 		if(rd)
 			begin
@@ -56,7 +63,7 @@ module UARTUnit(
 		if (~Reset_n)
 			begin
 			UART_TXD <= 8'b0;
-			{UART_CON0, UART_CON1} <= 2'b0;
+			{UART_CON0, UART_CON1} <= 2'b1;
 			prevTX_STATUS <= 1;
 			TX_EN <= 0;
 			end

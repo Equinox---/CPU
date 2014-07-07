@@ -55,8 +55,8 @@ module ControlUnit(input [31:0] instruct,
 				12'b000110??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h1, 2'h1, 1'h0, 1'h0, 1'h0, 6'b111101, 1'h1, 1'h0, 1'h0, 2'h0, 1'h1, 1'h0};
 				12'b000111??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h1, 2'h1, 1'h0, 1'h0, 1'h0, 6'b111111, 1'h1, 1'h0, 1'h0, 2'h0, 1'h1, 1'h0};
 				12'b000001??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h1, 2'h1, 1'h0, 1'h0, 1'h0, 6'b111001, 1'h1, 1'h0, 1'h0, 2'h0, 1'h1, 1'h0};
-				12'b101011??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h1, 1'h0, 1'h0, 1'h0, 6'b000000, 1'h1, 1'h1, 1'h0, 2'h0, 1'h1, 1'h0};
-				12'b100011??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h1, 1'h1, 1'h0, 1'h0, 6'b000000, 1'h1, 1'h0, 1'h1, 2'h1, 1'h1, 1'h0};
+				12'b101011??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h1, 1'h0, 1'h0, 1'h1, 6'b000000, 1'h1, 1'h1, 1'h0, 2'h0, 1'h1, 1'h0};
+				12'b100011??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h1, 1'h1, 1'h0, 1'h1, 6'b000000, 1'h1, 1'h0, 1'h1, 2'h1, 1'h1, 1'h0};
 				12'b001111??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h0, 2'h1, 1'h1, 1'h0, 1'h1, 6'b011010, 1'h0, 1'h0, 1'h0, 2'h0, 1'h0, 1'h1};
 				12'b000010??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h2, 2'h0, 1'h0, 1'h0, 1'h0, 6'b000000, 1'h0, 1'h0, 1'h0, 2'h0, 1'h0, 1'h0};
 				12'b000011??????: {PCsrc, RegDst, RegWr, ALUsrc1, ALUsrc2, ALUFun, Sign, MemWr, MemRd, MemtoReg, EXTOp, LUOp} <= {3'h2, 2'h2, 1'h1, 1'h0, 1'h0, 6'b000000, 1'h0, 1'h0, 1'h0, 2'h2, 1'h0, 1'h0};

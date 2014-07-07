@@ -19,13 +19,13 @@ UART_Receive:
 	bne $t4, $t1, UART_Receive
 	addi $t2, $t2, 1
 	beq $t2, $t3, Load2
-	lw $a2, 24($a0)			#**a2=operand1
+	lw $a2, 28($a0)			#**a2=operand1
 	sll $t0, $t0, 29
 	srl $t0, $t0, 29
 	sw $t0, 32($a0)
 	j UART_Receive
 Load2:
-	lw $a3, 24($a0)			#**a3=operand2
+	lw $a3, 28($a0)			#**a3=operand2
 	sll $t0, $t0, 29
 	srl $t0, $t0, 29
 	sw $t0, 32($a0)	
@@ -60,7 +60,6 @@ Interrupt:
 	andi $t0, $t0, 0xfff9
 	sw $t0, 8($a0)
 	sw $ra, 0($sp)
-	addi $t4, $0, 0
 	beq $t4, $0, First
 	addi $t3 ,$0, 1
 	beq $t4, $t3, Second
@@ -70,7 +69,8 @@ Interrupt:
 	beq $t4, $t3, Fourth
 Continue:
 	lw $ra, 0($sp)
-	addi $t0, $0, 2
+	sw $a1,20($a0)
+	addi $t0, $0, 3
 	sw $t0, 8($a0)
 	addi $26, $26, -4
 	jr $26
@@ -82,7 +82,7 @@ First:
 	addi $t4, $0, 1
 	j Continue
 Second:
-	sw $a1,20($a0)
+
 	sll $t0, $a2, 24
 	srl $t0, $t0, 28
 	jal DigitalTube
