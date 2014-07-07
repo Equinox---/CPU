@@ -49,7 +49,7 @@ module UARTUnit(
 		if (~Reset_n)
 			begin
 			UART_TXD <= 8'b0;
-			UART_CON <= 5'b0;
+			UART_CON[1:0] <= 2'b0;
 			prevTX_STATUS <= 1;
 			TX_EN <= 0;
 			end
@@ -72,7 +72,7 @@ module UARTUnit(
 						UART_TXD <= wdata[7:0];
 						TX_EN <= 1;
 						end
-					32'h40000020: UART_CON <= wdata[4:0];
+					32'h40000020: UART_CON[1:0] <= wdata[1:0];
 					default: ;
 				endcase
 				end

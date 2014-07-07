@@ -20,7 +20,7 @@ module test_SCMIPS;
 		begin
 		#1 Reset_n <= 1;
 		#1 switch <= 8'b00000010;
-		#600 $stop;
+		//#600 $stop;
 		end
 	SCMIPS inst(.sysclk(clk), .Reset_n(Reset_n), .switch(switch), .led(led), .UART_IN(UART_IN), .UART_OUT(UART_OUT),
 			.digi_out1(digi_out1), .digi_out2(digi_out2), .digi_out3(digi_out3), .digi_out4(digi_out4));
