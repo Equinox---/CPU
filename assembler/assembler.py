@@ -111,6 +111,7 @@ def rmlae(x):
 		x = x[:-1]
 	return x
 def IntToBinStr(integer, num):
+	isNeg = False
 	if isinstance(integer, str):
 		if not integer.isdigit():
 			if not (integer[0] == "$" or integer[0] == "-" or integer[:2] == "0x"):
@@ -119,12 +120,17 @@ def IntToBinStr(integer, num):
 				integer = integer[1:]
 				if not integer.isdigit():
 					integer = Register_Map[integer]
-			elif integer[:2] == "0x":
-				integer = int(integer, 16)
-	integer = int(integer)
+			else:
+				if integer[0] == "-":
+					isNeg = True
+					integer = integer[1:]
+				if integer[:2] == "0x":
+					integer = int(integer, 16)
 
-	if integer < 0:
-		integer = 2**num + integer
+	integer = int(integer)
+	isNeg = integer < 0 or isNeg
+	if isNeg:
+		integer = 2**num - abs(integer)
 	result = bin(integer)[2:]
 	result = "0" * (num - len(result)) + result
 	return result

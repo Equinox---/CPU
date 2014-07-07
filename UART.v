@@ -13,13 +13,14 @@ module UARTUnit(
 
 	reg [7:0] UART_TXD;
 	reg [7:0] UART_RXD;
-	reg [3:0] UART_CON;
+	reg [4:0] UART_CON;
 
 	reg TX_EN;
 	reg prevTX_STATUS;
 	wire baud_rate_clk;
 	wire RX_STATUS, TX_STATUS;
 
+	assign UART_CON[4] = ~TX_STATUS; // UART_CON[4] = 0发送模块空闲
 	always@(*)
 		begin
 		if(rd)
@@ -35,7 +36,7 @@ module UARTUnit(
 					rdata <= {24'b0, UART_RXD};
 					UART_CON[3] <= 0;
 					end			
-				32'h40000020: rdata <= {28'b0,UART_CON};
+				32'h40000020: rdata <= {27'b0,UART_CON};
 				default: rdata <= 32'b0;
 			endcase
 			end
@@ -56,11 +57,12 @@ module UARTUnit(
 		else
 			begin
 			prevTX_STATUS <= TX_STATUS;
-			if (RX_STATUS)
+			TX_EN <= 0;
+			if (RX_STATUS && UART_CON[1])
 				begin
 				UART_CON[3] <= 1;
 				end
-			if (TX_STATUS && ~prevTX_STATUS)
+			if (TX_STATUS && ~prevTX_STATUS && UART_CON[0])
 				UART_CON[2] <= 1;
 			if (wr)
 				begin
@@ -68,10 +70,9 @@ module UARTUnit(
 					32'h40000018:
 						begin
 						UART_TXD <= wdata[7:0];
-						UART_CON[0] <= 1;
 						TX_EN <= 1;
 						end
-					32'h40000020: UART_CON <= wdata[3:0];
+					32'h40000020: UART_CON <= wdata[4:0];
 					default: ;
 				endcase
 				end
