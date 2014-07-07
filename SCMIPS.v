@@ -65,7 +65,7 @@ module SCMIPS(
 						.addr(ALUOut), .wdata(DatabusB), .rdata(rDataFMem1)); // Data memory
 	Peripheral PeripheralInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
 							  .wdata(DatabusB), .rdata(rDataFMem2), .led(led), .switch(switch), .digi(digit), .irqout(IRQsig));
-	UARTUnit UartInst(.Reset_n, .CLK(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
+	UARTUnit UartInst(.Reset_n(Reset_n), .CLK(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
 				  .wdata(DatabusB), .rdata(rDataFMem3), .out(UART_OUT), .in(UART_IN));
 	digitube_scan DigitubeInst(.digi_in(digit), .digi_out1(digi_out1), .digi_out2(digi_out2), .digi_out3(digi_out3),
 							   .digi_out4(digi_out4));
