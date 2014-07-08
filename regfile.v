@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 
 module RegFile (reset,clk,addr1,data1,addr2,data2,wr,addr3,data3,
 				r31, ra0, ra1, ra2, rv0, rt6, rt7, rt5);//for test
