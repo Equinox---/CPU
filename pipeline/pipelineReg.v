@@ -41,6 +41,8 @@ module IDEXReg(
 				input [31:0] ID_DatabusA, ID_DatabusB,
 				input [31:0] ID_ExtendedImm,
 				input [4:0] ID_rt, ID_rd,
+				input [31:0] ID_PCplus4,
+				output [31:0] EX_PCplus4,
 				output reg [1:0] EX_RegDst,
 				output reg EX_Sign, EX_ALUsrc1, EX_ALUsrc2,
 				output reg [5:0] EX_ALUFun,
@@ -55,14 +57,14 @@ module IDEXReg(
 		if (~Reset_n || ID_Flush)
 			begin
 			{EX_Sign, EX_ALUsrc1, EX_ALUsrc2, EX_RegDst, EX_ALUFun, EX_MemWr, EX_MemRd,
-				EX_MemtoReg, EX_RegWr, EX_DatabusA, EX_DatabusB,EX_ExtendedImm,EX_rt, EX_rd} <= 0;
+				EX_MemtoReg, EX_RegWr, EX_DatabusA, EX_DatabusB,EX_ExtendedImm,EX_rt, EX_rd, EX_PCplus4} <= 0;
 			end
 		else
 			begin
 			{EX_Sign, EX_ALUsrc1, EX_ALUsrc2, EX_RegDst, EX_ALUFun, EX_MemWr, EX_MemRd,
-				EX_MemtoReg, EX_RegWr, EX_DatabusA, EX_DatabusB,EX_ExtendedImm,EX_rt, EX_rd}
+				EX_MemtoReg, EX_RegWr, EX_DatabusA, EX_DatabusB,EX_ExtendedImm,EX_rt, EX_rd, EX_PCplus4}
 				<= {ID_Sign, ID_ALUsrc1, ID_ALUsrc2, ID_RegDst, ID_ALUFun, ID_MemWr, ID_MemRd,
-				ID_MemtoReg, ID_RegWr, ID_DatabusA, ID_DatabusB,ID_ExtendedImm,ID_rt, ID_rd};
+				ID_MemtoReg, ID_RegWr, ID_DatabusA, ID_DatabusB,ID_ExtendedImm,ID_rt, ID_rd, ID_PCplus4};
 			end
 		end
 endmodule

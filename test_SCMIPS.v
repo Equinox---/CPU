@@ -9,6 +9,7 @@ module test_SCMIPS;
 	wire [7:0] led;
 	wire [6:0] digi_out1, digi_out2, digi_out3, digi_out4;
 	parameter DELAY = 31250;
+
 	initial
 		begin
 		clk <= 0;
@@ -33,7 +34,7 @@ module test_SCMIPS;
 		#DELAY UART_IN <= 0;
 		// end1
 		#DELAY UART_IN <= 1;
-		#DELAY UART_IN <= 1;
+		//#DELAY UART_IN <= 1;
 		#DELAY UART_IN <= 0;
 		// start2
 		#DELAY UART_IN <= 0;
