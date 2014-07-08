@@ -8,7 +8,7 @@ module UARTUnit(
 				input rd, wr,
 				input [31:0] addr, wdata,
 				output reg[31:0] rdata,
-				output out, in
+				output out, input in
 				);
 
 	reg [7:0] UART_TXD;
