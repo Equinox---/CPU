@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 
 module Peripheral (reset,clk,rd,wr,addr,wdata,rdata,led,switch,digi,irqout);
 input reset,clk;

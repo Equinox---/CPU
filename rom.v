@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 
 module ROM (addr,data);
 input [31:0] addr;

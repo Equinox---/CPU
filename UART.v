@@ -106,7 +106,7 @@ module brgenerator(sysclk,brclk,reset);
 			brclk<=0;
 		end
 		else begin
-			if(count==1) begin
+			if(count==216) begin
 				count<=0;
 				brclk<=~brclk;
 			end
@@ -190,7 +190,7 @@ module receiver(uartrx,sysclk,brclk,rxdata,rxstatus,reset);
 			recden<=1;
 			recd1<=0;
 		end
-		else if(count==7'd120) begin
+		else if(count==7'd120&&~rxstatus) begin
 			rxstatus<=1;
 			rxdata<=rxdata1;
 		end
