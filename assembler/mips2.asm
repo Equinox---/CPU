@@ -20,16 +20,18 @@ UART_Receive:
 	sll $t4, $t0, 28		#t0=UART_CON
 	srl $t4, $t4, 31		#t4=UART_CON[3]
 	bne $t4, $t1, UART_Receive
-	# led
+	#led
 	addi $s1, $zero, 2
 	or $s0, $s1, $s0
 sw $s0, 12($a0)
+
 	addi $t2, $t2, 1
 	beq $t2, $t3, Load2
 	#led
 	addi $s1, $0, 4
 	or $s0, $s1, $s0
 sw $s0, 12($a0)
+
 	lw $a2, 28($a0)			#**a2=operand1
 	sll $t0, $t0, 29
 	srl $t0, $t0, 29
@@ -39,15 +41,15 @@ Load2:
 addi $s1, $0, 8
 	or $s0, $s1, $s0
 	sw $s0, 12($a0)
-	lw $a3, 28($a0)     #**a3=operand2
+	lw $a3, 28($a0)			#**a3=operand2
 	sll $t0, $t0, 29
 	srl $t0, $t0, 29
 	sw $t0, 32($a0)	
-	
-	sw $a3, 24($a0)
+#sw $a3, 24($a0)
 	#calculate graetest common divisor
 	addi $t5, $a2, 0 #t5 is operand1
 	addi $t6, $a3, 0 #t6 is operand2
+	
 	sub $t7, $t5, $t6
 Judge:
 	beq $t7, $0, Exit
@@ -64,8 +66,13 @@ Negative:
 Interrupt:
 
 Exit:
+	lw $s0, 12($a0)
+	addi $s1, $zero, 16
+	or $s0, $s0, $s1
+	sw $s0, 12($a0)
+
 	add $v0, $t6, $0
-	sw $v0, 12($a0)
+	#sw $v0, 12($a0)
 UART_Send:
 	sw $v0, 24($a0)
 	lw $t1, 32($a0)
@@ -74,7 +81,7 @@ UART_Send:
 	addiu $t1, $t1, 7
 	sw $t1, 32($a1)
 Exit1:
-	#lw $s0, 12($a0)
-	#addi $s1, $zero, 32
-	#or $s0, $s0, $s1
-	#sw $s0, 12($a0)
+	lw $s0, 12($a0)
+	addi $s1, $zero, 32
+	or $s0, $s0, $s1
+	sw $s0, 12($a0)

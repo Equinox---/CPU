@@ -9,13 +9,12 @@ module UARTUnit(
 				input [31:0] addr, wdata,
 				output [31:0] rdata,
 				output out,
-				input in,
-				output reg UART_CON3
+				input in
 				);
 
 	reg [7:0] UART_TXD;
 	wire [7:0] UART_RXD;
-	reg UART_CON0, UART_CON1, UART_CON2;//, UART_CON3;
+	reg UART_CON0, UART_CON1, UART_CON2, UART_CON3;
 	wire UART_CON4;
 	wire [4:0] UART_CON;
 

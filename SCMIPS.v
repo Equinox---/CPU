@@ -4,14 +4,14 @@
 
 
 
-module SCMIPS(
+module cpu1(
 			input rawclk,
 			input Reset_n,
 			input UART_IN,
 			input [7:0] switch,
 			output [7:0] led,
 			output [6:0] digi_out1, digi_out2, digi_out3, digi_out4,
-			output UART_OUT, con3
+			output UART_OUT
 			);
 
 	// Instruct and PC-realted
@@ -69,7 +69,7 @@ module SCMIPS(
 	Peripheral PeripheralInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
 							  .wdata(DatabusB), .rdata(rDataFMem2), .led(led), .switch(switch), .digi(digit), .irqout(IRQsig));
 	UARTUnit UartInst(.Reset_n(Reset_n), .CLK(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
-				  .wdata(DatabusB), .rdata(rDataFMem3), .out(UART_OUT), .in(UART_IN) ,.UART_CON3(con3));
+				  .wdata(DatabusB), .rdata(rDataFMem3), .out(UART_OUT), .in(UART_IN));
 	digitube_scan DigitubeInst(.digi_in(digit), .digi_out1(digi_out1), .digi_out2(digi_out2), .digi_out3(digi_out3),
 							   .digi_out4(digi_out4));
 	ExtendUnit ExtendUnitInst(.EXTOp(EXTOp), .Imm16(Imm16), .ExtendedImm(ExtendedImm)); // Extend unit
