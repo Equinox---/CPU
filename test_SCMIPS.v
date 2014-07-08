@@ -51,6 +51,6 @@ module test_SCMIPS;
 		//#(DELAY * 20)  $stop;
 		//#600 $stop;
 		end
-	SCMIPS inst(.sysclk(clk), .Reset_n(Reset_n), .switch(switch), .led(led), .UART_IN(UART_IN), .UART_OUT(UART_OUT),
+	SCMIPS inst(.rawclk(clk), .Reset_n(Reset_n), .switch(switch), .led(led), .UART_IN(UART_IN), .UART_OUT(UART_OUT),
 			.digi_out1(digi_out1), .digi_out2(digi_out2), .digi_out3(digi_out3), .digi_out4(digi_out4));
 endmodule

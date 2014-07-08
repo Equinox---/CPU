@@ -3,14 +3,15 @@
  */
 
 
+
 module SCMIPS(
-			input sysclk,
+			input rawclk,
 			input Reset_n,
 			input UART_IN,
 			input [7:0] switch,
 			output [7:0] led,
 			output [6:0] digi_out1, digi_out2, digi_out3, digi_out4,
-			output UART_OUT
+			output UART_OUT, con3
 			);
 
 	// Instruct and PC-realted
@@ -47,8 +48,10 @@ module SCMIPS(
 
 	// DataMem-related
 	wire [31:0] rDataFMem1, rDataFMem2, rDataFMem3, rDataFMem;
+	wire sysclk;
 
-
+	// 分频
+	frequency freq(.sysclk(rawclk), .newclk(sysclk), .reset(Reset_n));
 	// Instances of submodule
 	ControlUnit ControlUnitInst(.instruct(instruct), .IRQsig(IRQsig), .super(super), .PCsrc(PCsrc),
 								.RegDst(RegDst), .RegWr(RegWr), .ALUFun(ALUFun), .MemRd(MemRd),
@@ -66,7 +69,7 @@ module SCMIPS(
 	Peripheral PeripheralInst(.reset(Reset_n), .clk(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
 							  .wdata(DatabusB), .rdata(rDataFMem2), .led(led), .switch(switch), .digi(digit), .irqout(IRQsig));
 	UARTUnit UartInst(.Reset_n(Reset_n), .CLK(sysclk), .rd(MemRd), .wr(MemWr), .addr(ALUOut),
-				  .wdata(DatabusB), .rdata(rDataFMem3), .out(UART_OUT), .in(UART_IN));
+				  .wdata(DatabusB), .rdata(rDataFMem3), .out(UART_OUT), .in(UART_IN) ,.UART_CON3(con3));
 	digitube_scan DigitubeInst(.digi_in(digit), .digi_out1(digi_out1), .digi_out2(digi_out2), .digi_out3(digi_out3),
 							   .digi_out4(digi_out4));
 	ExtendUnit ExtendUnitInst(.EXTOp(EXTOp), .Imm16(Imm16), .ExtendedImm(ExtendedImm)); // Extend unit
@@ -95,4 +98,25 @@ module SCMIPS(
 	// ConBA
 	assign ConBA = PCplus4 + (ExtendedImm << 2);
 
+endmodule
+
+
+
+module frequency(sysclk, newclk, reset);		//12?€¨¦‡‡???
+	input sysclk,reset;
+	output reg newclk=0;
+	reg [3:0] count=0;
+	always@(posedge sysclk or negedge reset) begin
+		if(reset==0) begin
+			count<=0;
+			newclk<=0;
+		end
+		else begin
+			if(count==4'd4) begin
+				count<=0;
+				newclk<=~newclk;
+			end
+			else count<=count+4'd1;
+		end
+	end
 endmodule
