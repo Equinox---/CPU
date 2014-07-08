@@ -33,7 +33,7 @@ J_PATTERN = {0 : "{op}{arg1}"}
 """
 R_PATTERN = {
 			0 : "000000_{arg2}_{arg3}_{arg1}_00000_{op}",
-			1 : "00000000000_{arg2}_{arg1}_{arg3}_{op}",
+			1 : "000000_00000_{arg2}_{arg1}_{arg3}_{op}",
 			2 : "000000_{arg1}_00000_00000_00000_{op}"
 			}
 I_PATTERN = {
@@ -208,7 +208,7 @@ def parseText(code):
 						if innerType < 2:
 							info["arg2"] = IntToBinStr(arg2, 5)
 							info["arg3"] = IntToBinStr(arg3, 5)
-				print info
+				print number, info
 				binary.append("%s\t%s"%(nowAddr, Pattern_Sets[i][innerType].format(**info)))
 				found = 1
 				number += 1
@@ -235,7 +235,7 @@ def parseFile(filename):
 	codeFile = open(filename)
 	rawText = codeFile.read()
 	predText = RE_COMMENT.sub(r"\n", rawText) # remove comment
-	predText = re.sub("\n{2,}", "\n", predText) # remove continuous \n
+	predText = re.sub("\n[ \r\n\t]*\n", "\n", predText) # remove continuous \n
 	predText = re.sub(":[ \t]*\n", ": ", predText) # make label in the same line with the next instruction
 	
 	return parseText(predText.split("\n"))
@@ -291,6 +291,7 @@ if __name__ == "__main__":
 													  #+ binary[i][22:27] + "_" + binary[i][27:32] + "_"
 												      #+ binary[i][32:37] + "_" + binary[i][37:43] 
 												      #+ "; // %s\n"%asmCode[i])
+				#print binary[i]
 				destfile.write("\t%d: data <= 32'b"%i + binary[i][11:] + "; // %s\n"%asmCode[i])
 		destfile.write("\tdefault: data <= 32'b" + binary[0][11:] + ";\nendcase")
 	else:
