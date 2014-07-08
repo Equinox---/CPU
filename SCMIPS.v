@@ -3,8 +3,9 @@
  */
 
 
-module SCMIPS(
-			input sysclk,
+
+module cpu1(
+			input rawclk,
 			input Reset_n,
 			input UART_IN,
 			input [7:0] switch,
@@ -47,8 +48,10 @@ module SCMIPS(
 
 	// DataMem-related
 	wire [31:0] rDataFMem1, rDataFMem2, rDataFMem3, rDataFMem;
+	wire sysclk;
 
-
+	// 分频
+	frequency freq(.sysclk(rawclk), .newclk(sysclk), .reset(Reset_n));
 	// Instances of submodule
 	ControlUnit ControlUnitInst(.instruct(instruct), .IRQsig(IRQsig), .super(super), .PCsrc(PCsrc),
 								.RegDst(RegDst), .RegWr(RegWr), .ALUFun(ALUFun), .MemRd(MemRd),
@@ -95,4 +98,25 @@ module SCMIPS(
 	// ConBA
 	assign ConBA = PCplus4 + (ExtendedImm << 2);
 
+endmodule
+
+
+
+module frequency(sysclk, newclk, reset);		//12?€¨¦‡‡???
+	input sysclk,reset;
+	output reg newclk=0;
+	reg [3:0] count=0;
+	always@(posedge sysclk or negedge reset) begin
+		if(reset==0) begin
+			count<=0;
+			newclk<=0;
+		end
+		else begin
+			if(count==4'd4) begin
+				count<=0;
+				newclk<=~newclk;
+			end
+			else count<=count+4'd1;
+		end
+	end
 endmodule

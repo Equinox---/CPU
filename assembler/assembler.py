@@ -1,4 +1,4 @@
-#!/bin/env python
+﻿#!/bin/env python
 #-*- coding: utf-8 -*-
 
 # This is an easy assembler of simplified MIPS architecture implemeted in Python.
@@ -224,7 +224,7 @@ def parseText(code):
 		for item in labelWaitDict[waitLabel]:
 			_IorJ, _inum, _addr = item
 			if _IorJ == 1:
-				labelRepStr = IntToBinStr(int(LabelDict[waitLabel][2:], 16) - int(_addr[2:],16) - 4, 18)[:-2] # I-Type: relative
+				labelRepStr = IntToBinStr(int(LabelDict[waitLabel][2:], 16) - int(_addr[2:], 16) - 4, 18)[:-2] # I-Type: relative
 			else:
 				labelRepStr = IntToBinStr(int(LabelDict[waitLabel][2:], 16), 32)[4:30] # J-Type: absolute
 			binary[_inum] = re.sub(r"label", labelRepStr, binary[_inum])
@@ -235,7 +235,9 @@ def parseFile(filename):
 	codeFile = open(filename)
 	rawText = codeFile.read()
 	predText = RE_COMMENT.sub(r"\n", rawText) # remove comment
+
 	predText = re.sub("\n[ \r\n\t]*\n", "\n", predText) # remove continuous \n
+
 	predText = re.sub(":[ \t]*\n", ": ", predText) # make label in the same line with the next instruction
 	
 	return parseText(predText.split("\n"))

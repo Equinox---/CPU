@@ -7,7 +7,7 @@ module UARTUnit(
 				input CLK,
 				input rd, wr,
 				input [31:0] addr, wdata,
-				output reg[31:0] rdata,
+				output [31:0] rdata,
 				output out,
 				input in
 				);
@@ -32,32 +32,6 @@ module UARTUnit(
 		end
 	assign UART_CON4 = TX_STATUS;
 	assign UART_CON = {UART_CON4, UART_CON3, UART_CON2, UART_CON1, UART_CON0};
-	always@(*)
-		begin
-		if (RX_STATUS)// && UART_CON1)
-			UART_CON3 <= 1;
-		if (TX_STATUS && ~prevTX_STATUS) //&& UART_CON0)
-			UART_CON2 <= 1;
-		if(rd)
-			begin
-			case(addr)
-				32'h40000018: 
-					begin
-					rdata <= {24'b0, UART_TXD};
-					UART_CON2 <= 0;
-					end
-				32'h4000001C:
-					begin
-					rdata <= {24'b0, UART_RXD};
-					UART_CON3 <= 0;
-					end			
-				32'h40000020: rdata <= {27'b0,UART_CON};
-				default: rdata <= 32'b0;
-			endcase
-			end
-		else
-			rdata <= 32'b0;
-		end
 
 	always @(negedge Reset_n or posedge CLK)
 		begin
@@ -65,11 +39,20 @@ module UARTUnit(
 			begin
 			UART_TXD <= 8'b0;
 			{UART_CON0, UART_CON1} <= 2'b1;
+			{UART_CON2, UART_CON3} <= 2'b0;
 			prevTX_STATUS <= 1;
 			TX_EN <= 0;
 			end
 		else
 			begin
+			if (RX_STATUS)// && UART_CON1)
+				UART_CON3 <= 1;
+			else if (rd && (addr == 32'h4000001C))
+					UART_CON3 <= 0;
+			if (TX_STATUS && ~prevTX_STATUS) //&& UART_CON0)
+				UART_CON2 <= 1;
+			else if (rd && (addr == 32'h40000018))
+				UART_CON2 <= 0;
 			prevTX_STATUS <= TX_STATUS;
 			TX_EN <= 0;
 			if (wr)
@@ -84,20 +67,222 @@ module UARTUnit(
 					default: ;
 				endcase
 				end
-			end
+			if (rd)
+				case(addr)
+					32'h40000018: 
+						UART_CON2 <= 0;
+					32'h4000001C:
+						UART_CON3 <= 0;
+					default:;
+				endcase
 		end
+		end
+	assign rdata = rd?((addr == 32'h40000018)?{24'b0, UART_TXD}:((addr == 32'h4000001C)?{24'b0, UART_RXD}:((addr == 32'h40000020)?{27'b0,UART_CON}:32'b0))):32'b0;
 
-
-	brgenerator brgenInst(.sysclk(CLK), .brclk(baud_rate_clk), .reset(Reset_n));
-	sender senderInst(.txdata(UART_TXD), .txen(TX_EN), .txstatus(TX_STATUS),
-					  .sysclk(CLK), .brclk(baud_rate_clk), .uarttx(out),
-					  .reset(Reset_n));
-	receiver recvInst(.uartrx(in), .sysclk(CLK), .brclk(baud_rate_clk),
-					  .rxdata(UART_RXD), .rxstatus(RX_STATUS), .reset(Reset_n));
+	Baud_Rate_Generator brgenInst(.sysclk(CLK), .resetn(Reset_n), .baud_rate_clk(baud_rate_clk));
+	UART_Sender senderInst(CLK, baud_rate_clk, Reset_n, TX_EN, TX_STATUS, out, UART_TXD);
+	UART_Receiver recvInst(in, CLK, baud_rate_clk, Reset_n, UART_RXD, RX_STATUS);
 endmodule
 
+module Baud_Rate_Generator(sysclk, resetn, baud_rate_clk);
+	input sysclk, resetn;
+	output reg baud_rate_clk;
+	integer count;
+	
+	initial begin
+		count <= 0;
+		baud_rate_clk <= 0;
+	end
+	always @(negedge resetn, posedge sysclk)
+		begin
+		if (!resetn)
+			begin
+			count <= 0;
+			baud_rate_clk <= 0;
+			end
+		else
+			if (count == 15)
+				begin
+					count <= 0;
+					baud_rate_clk <= ~baud_rate_clk;
+				end
+			else
+				count <= count + 1;
+		end
+		
+endmodule
+module UART_Receiver(UART_RX, sysclk, clk, resetn, RX_DATA, RX_STATUS);
+	input UART_RX, sysclk, clk, resetn;
+	output reg [7:0] RX_DATA;
+	output reg RX_STATUS;
+	reg enable;
+	reg [7:0] buff;
+	reg [3:0] data_count;
+	reg [3:0] inner_count;
+	reg [2:0] beg_count; 
+	reg pre_beg, ok, flag1, pre_flag;
 
-module brgenerator(sysclk,brclk,reset);
+	initial
+		begin
+		enable <= 0;
+		RX_DATA <= 0;
+		RX_STATUS <= 0;
+		pre_beg <= 0;
+		beg_count <= 0;
+		inner_count <= 0;
+		data_count <= 0;
+		ok <= 0;
+		flag1 <= 1;
+		pre_flag <= 1;
+		end
+	always @(posedge sysclk, negedge resetn)
+		begin
+		if (!resetn)
+			begin
+			pre_beg <= 0;
+			end
+		else if (!enable && !pre_beg && !UART_RX)
+				begin
+				pre_beg <= 1;
+				end
+		else if (!pre_flag)
+			pre_beg <= 0;
+		end
+	always @(posedge clk, negedge resetn)
+		begin
+		if (!resetn)
+			begin
+			beg_count <= 0;
+			enable <= 0;
+			ok <= 0;
+			data_count <= 0;
+			inner_count <= 0;
+			pre_flag <= 1;
+			end
+		else
+			begin
+			ok <= 0;
+			pre_flag <= 1;
+			if (pre_beg && pre_flag)
+				begin
+				beg_count <= beg_count + 1;
+				if (beg_count == 7)
+					begin
+					enable <= 1;
+					pre_flag <= 0;
+					end
+				end
+			else if (enable)
+				begin
+				inner_count <= inner_count + 1;
+				if (inner_count == 15)
+					begin
+					if (data_count == 8)
+						begin
+							enable <= 0;
+							ok <= 1;
+							data_count <= 0;
+						end
+					else
+						begin
+						buff[data_count] <= UART_RX;
+						data_count <= data_count + 1;
+						end
+					end
+				end
+			end
+		end
+	always @(posedge sysclk, negedge resetn)
+		begin
+		if (!resetn)
+			begin
+			RX_DATA <= 0;
+			RX_STATUS <= 0;
+			flag1 <= 1;
+			end
+		else
+			begin
+			RX_STATUS <= 0;
+			if (!ok)
+				flag1 <= 1;
+			else if (flag1)
+				begin
+				RX_STATUS <= 1;
+				RX_DATA <= buff;
+				flag1 <= 0;
+				end
+			end
+		end
+endmodule
+module UART_Sender(sysclk, clk, resetn, TX_EN, TX_STATUS, UART_TX, TX_DATA);
+	input sysclk, clk, resetn, TX_EN;
+	output reg TX_STATUS, UART_TX;
+	input [7:0] TX_DATA;
+	reg [3:0] inner_count;
+	reg [3:0] data_count;
+	reg tmp_tx, flag;
+
+	initial
+		begin
+		UART_TX <= 1;
+		TX_STATUS <= 1;
+		inner_count <= 0;
+		data_count <= 0;
+		tmp_tx <= 0;
+		flag <= 1;
+		end
+			
+	always @(posedge sysclk, negedge resetn)
+		begin
+		if (!resetn)
+			begin
+			TX_STATUS <= 1;
+			flag <= 1;
+			end
+		else if (TX_EN)
+			TX_STATUS <= 0;
+		else if (!tmp_tx)
+			flag <= 1;
+		else if (tmp_tx && flag)
+			begin
+			TX_STATUS <= 1;
+			flag <= 0;
+			end
+		
+		end
+	always @(posedge clk, negedge resetn)
+		begin
+			if (!resetn)
+				begin
+				UART_TX <= 1;
+				inner_count <= 0;
+				data_count <= 0;
+				tmp_tx <= 0;
+				end
+			else if (!TX_STATUS)
+				begin
+				tmp_tx <= 0;
+				inner_count <= inner_count + 1;
+				if (inner_count == 0)
+					begin
+					data_count <= data_count + 1;
+					if (data_count == 0)
+						UART_TX <= 0;
+					else if (data_count == 9)
+						UART_TX <= 1;
+					else if (data_count == 10) begin
+						tmp_tx <= 1;
+						data_count <= 0;
+						inner_count <= 0;
+						end
+					else
+						UART_TX <= TX_DATA[data_count - 1];
+					end
+				end
+		end
+
+endmodule
+/*module brgenerator(sysclk,brclk,reset);
 	input sysclk,reset;
 	output reg brclk=0;
 	reg [7:0] count=0;
@@ -228,3 +413,4 @@ module receiver(uartrx,sysclk,brclk,rxdata,rxstatus,reset);
 	end
 endmodule
 	
+*/
