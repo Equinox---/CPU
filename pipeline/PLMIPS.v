@@ -62,14 +62,14 @@ module PLMIPS(
 
 	// Harzard-related
 	wire stall;
-	wire ID_Flush, IF_Flush;
+	wire ID_Flush1, ID_Flush2, ID_Flush, IF_Flush;
 
 	// Forwarding-related
 	wire [1:0] ForwardA, ForwardB;
 	wire [31:0] tmpALUInA, tmpALUInB;
 
 	// Pipeline Reg related
-	wire [31:0] ID_PCplus4;
+	wire [31:0] ID_PCplus4, EX_PCplus4;
 	wire [4:0] EX_rdes, MEM_rdes;
 
 	// Instances of submodule
@@ -96,7 +96,7 @@ module PLMIPS(
 
 
 	// Pileline specified submodules
-	IFIDReg IFIDRegInst(.CLK(sysclk), .Reset_n(Reset_n), .IF_Flush(), .IF_Protect(stall), .IF_instruct(IF_instruct),
+	IFIDReg IFIDRegInst(.CLK(sysclk), .Reset_n(Reset_n), .IF_Flush(IF_Flush), .IF_Protect(stall), .IF_instruct(IF_instruct),
 						.IF_PCplus4(IF_PCplus4), .ID_instruct(ID_instruct), .ID_PCplus4(ID_PCplus4));
 	IDEXReg IDEXRegInst(.CLK(sysclk), .Reset_n(Reset_n), .ID_Flush(ID_Flush),
 						.ID_Sign(ID_Sign), .ID_ALUsrc1(ID_ALUsrc1), .ID_ALUsrc2(ID_ALUsrc2), .ID_RegDst(ID_RegDst),
@@ -106,7 +106,7 @@ module PLMIPS(
 						.EX_Sign(EX_Sign), .EX_ALUsrc1(EX_ALUsrc1), .EX_ALUsrc2(EX_ALUsrc2), .EX_ALUFun(EX_ALUFun),
 						.EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd), .EX_MemtoReg(EX_MemtoReg), .EX_RegWr(EX_RegWr),
 						.EX_DatabusA(EX_DatabusA), .EX_DatabusB(EX_DatabusA), .EX_ExtendedImm(EX_DatabusA),
-						.EX_rt(EX_rt), .EX_rd(EX_rt));
+						.EX_rt(EX_rt), .EX_rd(EX_rt), .ID_PCplus4(ID_PCplus4), .EX_PCplus4(EX_PCplus4));
 	EXMEMReg EXMEMRegInst(.CLK(sysclk), .Reset_n(Reset_n), .EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd),
 						  .EX_RegWr(EX_RegWr), .EX_MemtoReg(EX_MemtoReg), .EX_ALUOut(EX_ALUOut),
 			 			  .EX_rdes(EX_rdes), .MEM_MemWr(MEM_MemWr), .MEM_MemRd(MEM_MemRd), .MEM_RegWr(MEM_RegWr), 
@@ -118,22 +118,25 @@ module PLMIPS(
 	ForwardUnit ForwardUnitInst(.EXMEM_RegWr(MEM_RegWr), .EXMEM_rdes(MEM_rdes), .IDEX_rs(EX_rs), .IDEX_rt(EX_rt),
 				.MEMWB_rdes(WB_rdes), .MEMWB_RegWr(WB_RegWr), .ForwardA(ForwardA), .ForwardB(ForwardB));
 	HazardUnit HazardUnitInst(.IDEX_MemRd(EX_MemRd), .IDEX_rd(EX_rd), .IFID_rs(ID_rs), .IFID_rt(ID_rt),
-							  .ID_Flush(ID_Flush), .stall(stall));
+							  .ID_Flush(ID_Flush1), .stall(stall));
 
 
 
 	// Control
-	assign PC_Jump = (ID_PCsrc == );
-	assign PC_branch = ;
+	assign IF_Flush1 = (ID_PCsrc == 2 || ID_PCplus4 == 3); //jump instruction
+	assign ID_Flush2 = (ID_PCsrc == 1 && EX_ALUOut[0] == 1); //branch instruction
 
-
+	assign jorei = (IF_Flush1 | )
+	assign ID_Flush = ID_Flush1 | ID_Flush2 | jorei;
+	assign IF_Flush = IF_Flush1 | ID_Flush2;
 	// muxes
 	assign rDataFMem = rDataFMem1 | rDataFMem2 | rDataFMem3;
 	Mux2_32 alusrc1inst(.Out(tmpALUInA), .mux(ALUsrc1), .I0(DatabusA), .I1({27'b0, shamnt}));
 	Mux2_32 alusrc2inst(.Out(tmpALUInB), .mux(ALUsrc2), .I0(DatabusB), .I1(EX_ExtendedImm));
 	Mux2_32 luopinst(.Out(ID_ExtendedImm), .mux(LUOp), .I0(tmpImm), .I1({Imm16, 16'b0}));
-	Mux4_32 memtreginst(.Out(DataBusC), .mux(WB_MemtoReg), .I0(WB_ALUOut), .I1(rDataFMem),
+	Mux4_32 memtreginst(.Out(tmpDataBusC), .mux(WB_MemtoReg), .I0(WB_ALUOut), .I1(rDataFMem),
 						.I2(PCplus4), .I3(0));
+	Mux2_32 memtreg2inst(.Out(DataBusC), .mux(jorei), .I0(tmpDataBusC), .I1())
 	Mux4_5 regdstinst(.Out(EX_rdes), .mux(EX_RegDst), .I0(rd), .I1(rt), .I2(5'd31), .I3(5'd26)); 
 	Mux4_32 forwardainst(.Out(ALUInA), .mux(ForwardA), .I0(tmpALUInA), .I1(DataBusC), .I2(MEM_ALUOut), .I3(0));
 	Mux4_32 forwardbinst(.Out(ALUInB), .mux(ForwardB), .I0(tmpALUInB), .I1(DataBusC), .I2(MEM_ALUOut), .I3(0));
@@ -150,5 +153,5 @@ module PLMIPS(
 	assign ID_JTaddr = ID_instruct[25:0];
 
 	// ConBA
-	assign ConBA = PCplus4 + (ID_ExtendedImm << 2);
+	assign ConBA = EX_PCplus4 + (EX_ExtendedImm << 2);
 endmodule

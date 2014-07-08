@@ -8,7 +8,8 @@ module UARTUnit(
 				input rd, wr,
 				input [31:0] addr, wdata,
 				output reg[31:0] rdata,
-				output out, in
+				output out,
+				input in
 				);
 
 	reg [7:0] UART_TXD;
@@ -106,7 +107,7 @@ module brgenerator(sysclk,brclk,reset);
 			brclk<=0;
 		end
 		else begin
-			if(count==1) begin
+			if(count==216) begin
 				count<=0;
 				brclk<=~brclk;
 			end
