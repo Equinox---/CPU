@@ -31,16 +31,16 @@ module PCUnit(
 			begin
 			if (!PCProtect)
 				begin
-				if (EX_PCsrc == 1 && ALUOut0 == 1)
+				if (ID_PCsrc == 4)
+					PC <= 32'h80000004;
+				else if (ID_PCsrc == 5)
+					PC <= 32'h80000008;
+				else if (EX_PCsrc == 1 && ALUOut0 == 1)
 					PC <= ConBA;
 				else if (ID_PCsrc == 2)
 					PC <= {PCplus4[31:28], JTaddr, 2'b0};
 				else if (ID_PCsrc == 3)
 					PC <= DatabusA;
-				else if (ID_PCsrc == 4)
-					PC <= 32'h80000004;
-				else if (ID_PCsrc == 5)
-					PC <= 32'h80000008;
 				else
 					PC <= PCplus4;
 				end
