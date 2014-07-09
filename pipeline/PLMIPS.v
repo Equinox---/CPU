@@ -127,7 +127,7 @@ module PLMIPS(
 
 
 	// Control
-	assign IF_Flush1 = (ID_PCsrc == 2 || ID_PCplus4 == 3 || jorei); //jump instruction or interrupt/exception
+	assign IF_Flush1 = (ID_PCsrc == 2 || ID_PCsrc == 3 || jorei); //jump instruction or interrupt/exception
 	assign ID_Flush2 = (EX_PCsrc == 1 && EX_ALUOut[0] == 1 && (!jorei)); //branch instruction
 
 	assign branchBeforeInter = (ID_PCsrc == 4 && EX_PCsrc == 1);
