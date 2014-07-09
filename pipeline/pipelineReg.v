@@ -23,10 +23,11 @@ module IFIDReg(
 			ID_instruct <= 0;
 			end
 		else
-			begin
-			ID_instruct <= IF_instruct;
-			ID_PCplus4 <= IF_PCplus4;
-			end
+			if (!IF_Protect)
+				begin
+				ID_instruct <= IF_instruct;
+				ID_PCplus4 <= IF_PCplus4;
+				end
 		end
 endmodule
 // EXTOp, LUOp in ID
@@ -40,9 +41,9 @@ module IDEXReg(
 				input ID_RegWr,
 				input [31:0] ID_DatabusA, ID_DatabusB,
 				input [31:0] ID_ExtendedImm,
-				input [4:0] ID_rt, ID_rd,
+				input [4:0] ID_rt, ID_rd, ID_shamnt,
 				input [31:0] ID_PCplus4,
-				output [31:0] EX_PCplus4,
+				output reg [31:0] EX_PCplus4,
 				output reg [1:0] EX_RegDst,
 				output reg EX_Sign, EX_ALUsrc1, EX_ALUsrc2,
 				output reg [5:0] EX_ALUFun,
@@ -51,19 +52,19 @@ module IDEXReg(
 				output reg EX_RegWr,
 				output reg [31:0] EX_DatabusA, EX_DatabusB,
 				output reg [31:0] EX_ExtendedImm,
-				output reg [4:0] EX_rt, EX_rd);
+				output reg [4:0] EX_rt, EX_rd, EX_shamnt);
 	always @(posedge CLK or negedge Reset_n)
 		begin
 		if (~Reset_n || ID_Flush)
 			begin
-			{EX_Sign, EX_ALUsrc1, EX_ALUsrc2, EX_RegDst, EX_ALUFun, EX_MemWr, EX_MemRd,
+			{EX_Sign, EX_ALUsrc1, EX_ALUsrc2, EX_RegDst, EX_ALUFun, EX_MemWr, EX_MemRd, EX_shamnt,
 				EX_MemtoReg, EX_RegWr, EX_DatabusA, EX_DatabusB,EX_ExtendedImm,EX_rt, EX_rd, EX_PCplus4} <= 0;
 			end
 		else
 			begin
-			{EX_Sign, EX_ALUsrc1, EX_ALUsrc2, EX_RegDst, EX_ALUFun, EX_MemWr, EX_MemRd,
+			{EX_Sign, EX_ALUsrc1, EX_ALUsrc2, EX_RegDst, EX_ALUFun, EX_MemWr, EX_MemRd, EX_shamnt,
 				EX_MemtoReg, EX_RegWr, EX_DatabusA, EX_DatabusB,EX_ExtendedImm,EX_rt, EX_rd, EX_PCplus4}
-				<= {ID_Sign, ID_ALUsrc1, ID_ALUsrc2, ID_RegDst, ID_ALUFun, ID_MemWr, ID_MemRd,
+				<= {ID_Sign, ID_ALUsrc1, ID_ALUsrc2, ID_RegDst, ID_ALUFun, ID_MemWr, ID_MemRd, ID_shamnt,
 				ID_MemtoReg, ID_RegWr, ID_DatabusA, ID_DatabusB,ID_ExtendedImm,ID_rt, ID_rd, ID_PCplus4};
 			end
 		end
@@ -75,21 +76,23 @@ module EXMEMReg(
 				input EX_MemWr, EX_MemRd, EX_RegWr,
 				input [1:0]EX_MemtoReg,
 				input [31:0] EX_ALUOut,
+				input [31:0] EX_PCplus4, EX_DatabusB,
 				input [4:0] EX_rdes,
+				output reg [31:0] MEM_PCplus4,
 				output reg MEM_MemWr, MEM_MemRd, MEM_RegWr,
 				output reg [1:0]MEM_MemtoReg,
-				output reg [31:0] MEM_ALUOut,
+				output reg [31:0] MEM_ALUOut, MEM_DatabusB,
 				output reg [4:0] MEM_rdes);
 	always @(posedge CLK or negedge Reset_n)
 		begin
 		if (~Reset_n)
 			begin
-			{MEM_MemWr, MEM_MemRd, MEM_RegWr, MEM_MemtoReg, MEM_ALUOut, MEM_rdes} <= 0;
+			{MEM_MemWr, MEM_MemRd, MEM_RegWr, MEM_MemtoReg, MEM_ALUOut, MEM_rdes, MEM_PCplus4, MEM_DatabusB} <= 0;
 			end
 		else
 			begin
-			{MEM_MemWr, MEM_MemRd, MEM_RegWr, MEM_MemtoReg, MEM_ALUOut, MEM_rdes}
-				<= {EX_MemWr, EX_MemRd, EX_RegWr, EX_MemtoReg, EX_ALUOut, EX_rdes};
+			{MEM_MemWr, MEM_MemRd, MEM_RegWr, MEM_MemtoReg, MEM_ALUOut, MEM_rdes, MEM_PCplus4, MEM_DatabusB}
+				<= {EX_MemWr, EX_MemRd, EX_RegWr, EX_MemtoReg, EX_ALUOut, EX_rdes, EX_PCplus4, EX_DatabusB};
 			end
 		end
 endmodule
@@ -99,21 +102,21 @@ module MEMWBReg(
 				input [1:0] MEM_MemtoReg,
 				input MEM_RegWr,
 				input [4:0] MEM_rdes,
-				input [31:0] MEM_ALUOut,
+				input [31:0] MEM_ALUOut, MEM_PCplus4,
 				output reg [1:0] WB_MemtoReg,
 				output reg WB_RegWr,
 				output reg [4:0] WB_rdes,
-				output reg [31:0] WB_ALUOut);
+				output reg [31:0] WB_ALUOut, WB_PCplus4);
 	always @(posedge CLK or negedge Reset_n)
 		begin
 		if (~Reset_n)
 			begin
-			{WB_ALUOut, WB_RegWr, WB_rdes, WB_MemtoReg} <= 0;
+			{WB_ALUOut, WB_RegWr, WB_rdes, WB_MemtoReg, WB_PCplus4} <= 0;
 			end
 		else
 			begin
-			{WB_ALUOut, WB_RegWr, WB_rdes, WB_MemtoReg}
-				<= {MEM_ALUOut, MEM_RegWr, MEM_rdes, MEM_MemtoReg};
+			{WB_ALUOut, WB_RegWr, WB_rdes, WB_MemtoReg, WB_PCplus4}
+				<= {MEM_ALUOut, MEM_RegWr, MEM_rdes, MEM_MemtoReg, MEM_PCplus4};
 			end
 		end
 endmodule

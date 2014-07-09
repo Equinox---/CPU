@@ -30,14 +30,6 @@ module PCUnit(
 		else
 			begin
 			if (!PCProtect)
-				/*case (PCsrc)
-					0: PC <= PCplus4;
-					1: PC <= ALUOut0?ConBA:PCplus4;
-					2: PC <= {PCplus4[31:28], JTaddr, 2'b0};
-					3: PC <= DatabusA;
-					4: PC <= 32'h80000004;
-					5: PC <= 32'h80000008;
-				endcase*/
 				begin
 				if (EX_PCsrc == 1 && ALUOut0 == 1)
 					PC <= ConBA;
@@ -45,6 +37,12 @@ module PCUnit(
 					PC <= {PCplus4[31:28], JTaddr, 2'b0};
 				else if (ID_PCsrc == 3)
 					PC <= DatabusA;
+				else if (ID_PCsrc == 4)
+					PC <= 32'h80000004;
+				else if (ID_PCsrc == 5)
+					PC <= 32'h80000008;
+				else
+					PC <= PCplus4;
 				end
 			end
 		end

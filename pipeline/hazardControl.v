@@ -6,18 +6,10 @@
 module HazardUnit(
 					input IDEX_MemRd,
 					input [4:0] IDEX_rd, IFID_rs, IFID_rt,
-					output reg ID_Flush,
-					output reg stall
+					output ID_Flush,
+					output stall // flush IDEX and keep PC/IFID
 					);
 
-	always @(*)
-		begin
-		stall <= 0;
-		ID_Flush <= 0;
-		if (IDEX_MemRd && ((IDEX_rd == IFID_rs) || (IDEX_rd == IFID_rt)))
-			begin
-			ID_Flush <= 1;
-			stall <= 1;
-			end
-		end
+	assign stall = (IDEX_MemRd && ((IDEX_rd == IFID_rs) || (IDEX_rd == IFID_rt)));
+	assign ID_Flush = stall;
 endmodule
