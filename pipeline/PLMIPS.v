@@ -34,6 +34,8 @@ module PLMIPS(
 	wire [4:0] EX_rdes, MEM_rdes, WB_rdes;
 	wire [31:0] EX_DatabusA, EX_DatabusB, ID_DatabusA, ID_DatabusB, MEM_DatabusB, aftDatabusA;
 	// Control Signals
+	reg branchBeforeInter2;
+	wire branchBeforeInter;
 	//ID
 	wire ID_Sign, ID_ALUsrc1, ID_ALUsrc2, super, ID_RegWr, ID_MemWr, ID_MemRd, EXTOp, LUOp;
 	wire [2:0] ID_PCsrc;
@@ -105,8 +107,8 @@ module PLMIPS(
 						.ID_RegWr(ID_RegWr), .ID_DatabusA(ID_DatabusA), .ID_DatabusB(ID_DatabusB), .ID_ExtendedImm(ID_ExtendedImm),
 						.ID_rt(ID_rt), .ID_rd(ID_rd), .ID_shamnt(ID_shamnt), .EX_shamnt(EX_shamnt), .EX_RegDst(EX_RegDst), .EX_PCsrc(EX_PCsrc),
 						.EX_Sign(EX_Sign), .EX_ALUsrc1(EX_ALUsrc1), .EX_ALUsrc2(EX_ALUsrc2), .EX_ALUFun(EX_ALUFun), .EX_rs(EX_rs),
-						.EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd), .EX_MemtoReg(EX_MemtoReg), .EX_RegWr(EX_RegWr),
-						.EX_DatabusA(EX_DatabusA), .EX_DatabusB(EX_DatabusB), .EX_ExtendedImm(EX_ExtendedImm),
+						.EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd), .EX_MemtoReg(EX_MemtoReg), .EX_RegWr(EX_RegWr), .branchBeforeInter2(branchBeforeInter2),
+						.EX_DatabusA(EX_DatabusA), .EX_DatabusB(EX_DatabusB), .EX_ExtendedImm(EX_ExtendedImm), .IF_PCplus4(IF_PCplus4),
 						.EX_rt(EX_rt), .EX_rd(EX_rd), .ID_PCplus4(ID_PCplus4), .EX_PCplus4(EX_PCplus4), .branchBeforeInter(branchBeforeInter));
 	EXMEMReg EXMEMRegInst(.CLK(sysclk), .Reset_n(Reset_n), .EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd), .EX_PCplus4(EX_PCplus4),
 						  .EX_RegWr(EX_RegWr), .EX_MemtoReg(EX_MemtoReg), .EX_ALUOut(EX_ALUOut), .EX_DatabusB(tmpALUInB),
@@ -135,6 +137,13 @@ module PLMIPS(
 	assign jorei = (ID_PCsrc == 4 || ID_PCsrc == 5);
 	assign ID_Flush = ID_Flush1 | ID_Flush2;
 	assign IF_Flush = IF_Flush1 | ID_Flush2;
+	always @(posedge sysclk or negedge Reset_n)
+		begin
+		if (!Reset_n)
+			branchBeforeInter2 <= 0;
+		else
+			branchBeforeInter2 <= IF_Flush;
+		end
 	// muxes
 	assign MEM_rDataFMem = MEM_rDataFMem1 | MEM_rDataFMem2 | MEM_rDataFMem3;
 	Mux2_32 alusrc1inst(.Out(ALUInA), .mux(EX_ALUsrc1), .I0(tmpALUInA), .I1({27'b0, EX_shamnt}));

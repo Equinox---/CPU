@@ -39,6 +39,7 @@ endmodule
 module IDEXReg(
 				input CLK, Reset_n, ID_Flush,
 				input branchBeforeInter,
+				input branchBeforeInter2,
 				input ID_Sign, ID_ALUsrc1, ID_ALUsrc2,
 				input [1:0] ID_RegDst,
 				input [5:0] ID_ALUFun,
@@ -50,6 +51,7 @@ module IDEXReg(
 				input [4:0] ID_rt, ID_rd, ID_rs, ID_shamnt,
 				input [31:0] ID_PCplus4,
 				input [2:0] ID_PCsrc,
+				input [31:0] IF_PCplus4,
 				output reg [2:0] EX_PCsrc,
 				output reg [31:0] EX_PCplus4,
 				output reg [1:0] EX_RegDst,
@@ -77,7 +79,7 @@ module IDEXReg(
 				{EX_Sign, EX_ALUsrc1, EX_ALUsrc2, EX_RegDst, EX_ALUFun, EX_MemWr, EX_MemRd, EX_shamnt, EX_rs, EX_PCsrc,
 					EX_MemtoReg, EX_RegWr, EX_DatabusA, EX_DatabusB,EX_ExtendedImm,EX_rt, EX_rd, EX_PCplus4}
 					<= {ID_Sign, ID_ALUsrc1, ID_ALUsrc2, ID_RegDst, ID_ALUFun, ID_MemWr, ID_MemRd, ID_shamnt, ID_rs, ID_PCsrc,
-					ID_MemtoReg, ID_RegWr, ID_DatabusA, ID_DatabusB,ID_ExtendedImm,ID_rt, ID_rd, branchBeforeInter?(ID_PCplus4 - 4):ID_PCplus4};
+					ID_MemtoReg, ID_RegWr, ID_DatabusA, ID_DatabusB,ID_ExtendedImm,ID_rt, ID_rd, branchBeforeInter2?IF_PCplus4:(branchBeforeInter?(ID_PCplus4 - 4):ID_PCplus4)};
 			end
 		end
 endmodule

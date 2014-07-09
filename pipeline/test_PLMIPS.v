@@ -24,10 +24,10 @@ module test_PLMIPS;
 		//#1 switch <= 8'b00000010;
 		#DELAY UART_IN <= 0;
 		//begin
+		#DELAY UART_IN <= 1;
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 1;
-		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 0;
@@ -37,17 +37,41 @@ module test_PLMIPS;
 		//#DELAY UART_IN <= 1;
 		#DELAY UART_IN <= 0;
 		// start2
-		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 0;
 		#DELAY UART_IN <= 1;
-		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 0;
-		#DELAY UART_IN <= 0;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
 		// end2
 		#DELAY UART_IN <= 1;
-
+		#(DELAY * 9000000) UART_IN <= 0;
+		// start3
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 0;
+		#DELAY UART_IN <= 0;
+		#DELAY UART_IN <= 0;
+		#DELAY UART_IN <= 0;
+		#DELAY UART_IN <= 0;
+		#DELAY UART_IN <= 0;
+		#DELAY UART_IN <= 0;
+		// end3
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 0;
+		// start4
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		#DELAY UART_IN <= 1;
+		// end4
+		#DELAY UART_IN <= 1;
+		#(DELAY * 20) $stop;
 		//#(DELAY * 20)  $stop;
 		//#600 $stop;
 		end
