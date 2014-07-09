@@ -44,6 +44,8 @@ module PCUnit(
 				else
 					PC <= PCplus4;
 				end
+			else
+				PC <= PC;
 			end
 		end
 endmodule

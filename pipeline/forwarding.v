@@ -5,9 +5,9 @@
 
 module ForwardUnit(
 					input EXMEM_RegWr,
-					input [5:0] EXMEM_rdes,
-					input [5:0] IDEX_rs, IDEX_rt,
-					input [5:0] MEMWB_rdes,
+					input [4:0] EXMEM_rdes,
+					input [4:0] IDEX_rs, IDEX_rt,
+					input [4:0] MEMWB_rdes,
 					input MEMWB_RegWr,
 					output reg[1:0] ForwardA, ForwardB
 					);

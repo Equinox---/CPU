@@ -82,8 +82,8 @@ module PLMIPS(
 				  .ALUOut0(EX_ALUOut[0]), .ConBA(ConBA), .JTaddr(ID_JTaddr), .DatabusA(DatabusA),
 				  .PCplus4(IF_PCplus4), .PC(PC), .super(super)); //PC
 	ROM InstructMemInst(PC, IF_instruct); //instruct fetch
-	RegFile RegFileInst(.reset(Reset_n), .clk(sysclk), .addr1(rs), .addr2(rt), .data1(ID_DatabusA),
-						.data2(ID_DatabusB), .wr(MEM_RegWr), .addr3(MEM_rdes), .data3(DataBusC)); // register unit
+	RegFile RegFileInst(.reset(Reset_n), .clk(sysclk), .addr1(ID_rs), .addr2(ID_rt), .data1(ID_DatabusA),
+						.data2(ID_DatabusB), .wr(WB_RegWr), .addr3(WB_rdes), .data3(DataBusC)); // register unit
 	ALU ALUInst(.A(ALUInA), .B(ALUInB), .S(EX_ALUOut), .ALUFun(EX_ALUFun), .Sign(EX_Sign)); // ALU Unit
 	DataMem DataMemInst(.reset(Reset_n), .clk(sysclk), .rd(MEM_MemRd), .wr(MEM_MemWr),
 						.addr(MEM_ALUOut), .wdata(MEM_DatabusB), .rdata(rDataFMem1)); // Data memory
@@ -107,11 +107,11 @@ module PLMIPS(
 						.EX_Sign(EX_Sign), .EX_ALUsrc1(EX_ALUsrc1), .EX_ALUsrc2(EX_ALUsrc2), .EX_ALUFun(EX_ALUFun),
 						.EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd), .EX_MemtoReg(EX_MemtoReg), .EX_RegWr(EX_RegWr),
 						.EX_DatabusA(EX_DatabusA), .EX_DatabusB(EX_DatabusB), .EX_ExtendedImm(EX_ExtendedImm),
-						.EX_rt(EX_rt), .EX_rd(EX_rt), .ID_PCplus4(ID_PCplus4), .EX_PCplus4(EX_PCplus4));
+						.EX_rt(EX_rt), .EX_rd(EX_rd), .ID_PCplus4(ID_PCplus4), .EX_PCplus4(EX_PCplus4));
 	EXMEMReg EXMEMRegInst(.CLK(sysclk), .Reset_n(Reset_n), .EX_MemWr(EX_MemWr), .EX_MemRd(EX_MemRd), .EX_PCplus4(EX_PCplus4),
 						  .EX_RegWr(EX_RegWr), .EX_MemtoReg(EX_MemtoReg), .EX_ALUOut(EX_ALUOut), .EX_DatabusB(EX_DatabusB),
 			 			  .EX_rdes(EX_rdes), .MEM_MemWr(MEM_MemWr), .MEM_MemRd(MEM_MemRd), .MEM_RegWr(MEM_RegWr), .MEM_PCplus4(MEM_PCplus4),
-			 			  .MEM_MemtoReg(MEM_MemtoReg), .MEM_ALUOut(MEM_MemtoReg), .MEM_rdes(MEM_rdes), .MEM_DatabusB(MEM_DatabusB));
+			 			  .MEM_MemtoReg(MEM_MemtoReg), .MEM_ALUOut(MEM_ALUOut), .MEM_rdes(MEM_rdes), .MEM_DatabusB(MEM_DatabusB));
 
 	MEMWBReg MEMWBRegInst(.CLK(sysclk), .Reset_n(Reset_n), .MEM_MemtoReg(MEM_MemtoReg), .MEM_RegWr(MEM_RegWr), .MEM_rdes(MEM_rdes), .MEM_PCplus4(MEM_PCplus4),
 					.MEM_ALUOut(MEM_ALUOut), .WB_MemtoReg(WB_MemtoReg), .WB_RegWr(WB_RegWr), .WB_rdes(WB_rdes), .WB_ALUOut(WB_ALUOut), .WB_PCplus4(WB_PCplus4));
