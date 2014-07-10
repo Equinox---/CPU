@@ -18,3 +18,5 @@ pipeline/work/*
 [#]*[#]
 
 # add other file/directories here to ignore by git
+*.txt
+*.doc[x]*

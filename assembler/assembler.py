@@ -245,12 +245,6 @@ def parseFile(filename):
 
 if __name__ == "__main__":
 	srcfile = sys.argv[1]
-	"""if len(sys.argv) == 3:
-		destfile = sys.argv[2]
-	else:
-		destfile = srcfile + '.out'
-	destfile = open(destfile, "w")
-	destfile.write("\n".join(parseFile(srcfile)))"""
 	from optparse import OptionParser
 	# 命令行参数
 	parser = OptionParser('')
