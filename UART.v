@@ -30,7 +30,7 @@ module UARTUnit(
 		UART_CON0 <= 1;
 		UART_CON1 <= 1;
 		end
-	assign UART_CON4 = TX_STATUS;
+	assign UART_CON4 = ~TX_STATUS;
 	assign UART_CON = {UART_CON4, UART_CON3, UART_CON2, UART_CON1, UART_CON0};
 
 	always @(negedge Reset_n or posedge CLK)
@@ -45,11 +45,11 @@ module UARTUnit(
 			end
 		else
 			begin
-			if (RX_STATUS)// && UART_CON1)
+			if (RX_STATUS && UART_CON1)
 				UART_CON3 <= 1;
 			else if (rd && (addr == 32'h4000001C))
 					UART_CON3 <= 0;
-			if (TX_STATUS && ~prevTX_STATUS) //&& UART_CON0)
+			if (TX_STATUS && ~prevTX_STATUS && UART_CON0)
 				UART_CON2 <= 1;
 			else if (rd && (addr == 32'h40000018))
 				UART_CON2 <= 0;

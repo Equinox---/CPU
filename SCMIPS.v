@@ -4,7 +4,7 @@
 
 
 
-module cpu1(
+module SCMIPS(
 			input rawclk,
 			input Reset_n,
 			input UART_IN,

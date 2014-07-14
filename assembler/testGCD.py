@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
+# This module is implemented to test the correctness of our CPU running "UART&GCD" mips code
+# Use createTestFile(number) to create <number> sets of test data.
+# The created test data will be in "test_input.txt" file
+# Send this file in the UART-DEBUG-HELPER to altera device, and copy the reply to a file(in ascii coding, not binary coding)
+# then run: python testGCD.py test_input.txt test_output.txt to test the correctness
 
 import re
 

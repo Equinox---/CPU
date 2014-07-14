@@ -45,11 +45,11 @@ module UARTUnit(
 			end
 		else
 			begin
-			if (RX_STATUS)// && UART_CON1)
+			if (RX_STATUS && UART_CON1)
 				UART_CON3 <= 1;
 			else if (rd && (addr == 32'h4000001C))
 					UART_CON3 <= 0;
-			if (TX_STATUS && ~prevTX_STATUS) //&& UART_CON0)
+			if (TX_STATUS && ~prevTX_STATUS && UART_CON0)
 				UART_CON2 <= 1;
 			else if (rd && (addr == 32'h40000018))
 				UART_CON2 <= 0;
@@ -101,7 +101,7 @@ module Baud_Rate_Generator(sysclk, resetn, baud_rate_clk);
 			baud_rate_clk <= 0;
 			end
 		else
-			if (count == 15)
+			if (count == 161)
 				begin
 					count <= 0;
 					baud_rate_clk <= ~baud_rate_clk;
